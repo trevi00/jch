@@ -97,7 +97,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           {/* 🏷️ 브랜드 로고: 클릭 시 대시보드로 이동 */}
           <Link to="/dashboard" className="text-2xl font-bold text-primary-600 dark:text-primary-400">
-            잡았다
+            JOB았다
           </Link>
 
           {/* 🔍 통합 검색바 (md: 이상에서만 표시) */}
@@ -120,9 +120,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <DarkModeToggle />
           <button className="relative p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 rounded-lg" aria-label="알림 3개" type="button">
             <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              3
-            </span>
           </button>
           
           <div className="relative group">

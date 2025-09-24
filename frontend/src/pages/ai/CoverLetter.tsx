@@ -19,9 +19,9 @@ export default function CoverLetter() {
           <p className="text-gray-600">원하는 방식을 선택하여 맞춤형 자기소개서를 생성해보세요</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-4xl mx-auto">
           {/* 기본 생성 모드 */}
-          <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105">
+          {/* <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105">
             <CardHeader className="text-center">
               <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                 <FileText className="w-8 h-8 text-blue-600" />
@@ -58,7 +58,7 @@ export default function CoverLetter() {
                 기본 생성 시작
               </Button>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* 인터랙티브 생성 모드 */}
           <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105">
@@ -66,7 +66,7 @@ export default function CoverLetter() {
               <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
                 <Brain className="w-8 h-8 text-purple-600" />
               </div>
-              <CardTitle className="text-xl">AI 인터랙티브 생성</CardTitle>
+              <CardTitle className="text-xl">AI 자기소개서 생성</CardTitle>
               <p className="text-sm text-gray-600">
                 AI와 대화하며 맞춤형 자소서 생성
               </p>
@@ -94,8 +94,7 @@ export default function CoverLetter() {
                 onClick={() => setMode('interactive')}
                 className="w-full bg-purple-600 hover:bg-purple-700"
               >
-                <Brain className="w-4 h-4 mr-2" />
-                인터랙티브 생성 시작
+                자기소개서 생성 시작
               </Button>
             </CardContent>
           </Card>
@@ -111,35 +110,29 @@ export default function CoverLetter() {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left p-3">구분</th>
-                    <th className="text-center p-3 text-blue-600">기본 생성</th>
-                    <th className="text-center p-3 text-purple-600">인터랙티브 생성</th>
+                    <th className="text-left p-2">구분</th>
+                    <th className="text-center p-2 text-purple-600">자기소개서 생성</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">
                   <tr className="border-b">
                     <td className="p-3 font-medium">소요 시간</td>
-                    <td className="p-3 text-center">3-5분</td>
                     <td className="p-3 text-center">10-15분</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3 font-medium">맞춤화 정도</td>
-                    <td className="p-3 text-center">중간</td>
                     <td className="p-3 text-center">높음</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3 font-medium">사용 편의성</td>
-                    <td className="p-3 text-center">매우 쉬움</td>
                     <td className="p-3 text-center">쉬움</td>
                   </tr>
                   <tr className="border-b">
                     <td className="p-3 font-medium">결과물 품질</td>
-                    <td className="p-3 text-center">좋음</td>
                     <td className="p-3 text-center">매우 좋음</td>
                   </tr>
                   <tr>
                     <td className="p-3 font-medium">추천 대상</td>
-                    <td className="p-3 text-center">빠른 생성 필요</td>
                     <td className="p-3 text-center">고품질 자소서 필요</td>
                   </tr>
                 </tbody>
@@ -188,7 +181,7 @@ export default function CoverLetter() {
             모드 선택으로 돌아가기
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">AI 인터랙티브 자소서 생성</h1>
+            <h1 className="text-2xl font-bold">AI 자기소서개 생성</h1>
             <p className="text-gray-600">AI와 대화하며 맞춤형 자기소개서를 만들어보세요</p>
           </div>
         </div>

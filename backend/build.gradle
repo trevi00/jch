@@ -10,7 +10,7 @@ description = 'JBD - 취업 지원 솔루션'
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
 

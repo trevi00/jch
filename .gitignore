@@ -1,0 +1,78 @@
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+
+# Build
+build/
+target/
+out/
+bin/
+.gradle/
+*.class
+*.jar
+*.war
+*.ear
+
+# Environment
+.env
+*.env.local
+*.env.development
+*.env.production
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+mysql_data/
+redis_data/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Testing
+coverage/
+.nyc_output
+*.coverage
+.coverage.*
+htmlcov/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# Application specific
+uploads/
+temp/
+cache/
+
+# Configuration files with sensitive data
+backend/src/main/resources/application.yml

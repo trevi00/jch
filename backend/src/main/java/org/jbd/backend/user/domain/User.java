@@ -1,6 +1,7 @@
 package org.jbd.backend.user.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.jbd.backend.common.entity.BaseEntity;
 import org.jbd.backend.user.domain.enums.EmploymentStatus;
 import org.jbd.backend.user.domain.enums.UserType;

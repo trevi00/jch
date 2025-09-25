@@ -292,6 +292,32 @@ export default function Settings() {
                 </div>
               )}
 
+{activeTab === 'account' && (
+                <div>
+                  <h2 className="text-lg font-semibold mb-4">계정 관리</h2>
+                  <div className="space-y-6">
+                    <div className="p-4 bg-yellow-50 rounded-lg">
+                      <h3 className="font-medium text-yellow-800 mb-2">계정 삭제</h3>
+                      <p className="text-sm text-yellow-700 mb-3">
+                        계정을 삭제하면 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.
+                      </p>
+                      <button className="btn-outline text-red-600 border-red-600 hover:bg-red-50">
+                        계정 삭제
+                      </button>
+                    </div>
+
+                    <div className="border-t pt-6">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center text-red-600 hover:text-red-700"
+                      >
+                        <LogOut className="w-4 h-4 mr-2" />
+                        로그아웃
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
               {activeTab === "credit" && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">카드 등록</h2>

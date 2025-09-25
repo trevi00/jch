@@ -17,12 +17,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              <span className="text-primary-600">잡았다</span>
+              <span className="text-primary-600">JOB았다</span>
               <br />
               취업 지원 솔루션
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              국비 학원 원생들을 위한 종합 취업 지원 플랫폼
+              종합 취업 지원 플랫폼
               <br />
               AI 기반 면접 연습, 자소서 작성부터 채용공고까지 한 번에
             </p>
@@ -30,7 +30,6 @@ export default function Home() {
               <Button size="lg" className="text-lg px-8 shadow-lg hover:shadow-xl transition-all duration-300" asChild>
                 <Link to="/register">
                   시작하기
-                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8 border-2 hover:bg-primary-50" asChild>

@@ -47,7 +47,7 @@ const menuItems = [
     icon: Brain,
     subItems: [
       { title: 'AI 챗봇', icon: Bot, path: '/ai/chatbot' },
-      { title: 'AI 면접', icon: MessageSquare, path: '/ai/interview' },
+      { title: 'AI 모의면접', icon: MessageSquare, path: '/ai/interview' },
       { title: '자기소개서 생성', icon: FileText, path: '/ai/cover-letter' },
       { title: 'AI 번역', icon: Languages, path: '/ai/translation' },
     ],

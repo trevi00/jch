@@ -214,7 +214,6 @@ export default function Jobs() {
                 type="submit"
                 className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors duration-200"
               >
-                <Search className="h-4 w-4 mr-2" />
                 검색
               </Button>
 
@@ -225,7 +224,6 @@ export default function Jobs() {
                   onClick={() => navigate('/jobs/create')}
                   className="px-6 py-4 bg-gray-900 hover:bg-gray-800 text-white font-medium transition-colors duration-200 flex items-center gap-2"
                 >
-                  <Plus className="h-4 w-4" />
                   등록
                 </Button>
               )}

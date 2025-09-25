@@ -41,7 +41,7 @@ export default function JobDetail() {
   })
 
   const { data: applicationData } = useQuery({
-    queryKey: ['job-application', id],
+    queryKey: ['job-application', id, user?.id],
     queryFn: () => apiClient.getMyApplications(),
     enabled: !!id && !!user,
   })
@@ -151,9 +151,9 @@ export default function JobDetail() {
     return labels[level] || level
   }
 
-  const userApplication = applicationData?.data?.content?.find(
-    app => app.userId === user?.id
-  )
+const userApplication = applicationData?.data?.content?.find(
+  app => app.jobPostingId === Number(id)
+)
 
   const getApplicationStatusLabel = (status: ApplicationStatus) => {
     const labels: Record<ApplicationStatus, string> = {

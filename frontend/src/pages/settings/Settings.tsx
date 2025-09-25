@@ -295,60 +295,100 @@ export default function Settings() {
               {activeTab === "credit" && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">카드 등록</h2>
-                    {/* 카드 번호 입력 */}
+                  {/* 카드 번호 입력 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      카드 번호
+                    </label>
+                    <div className="flex space-x-2">
+                      <input
+                        type="text"
+                        maxLength={4}
+                        className="input w-16 text-center"
+                        required
+                      />
+                      <input
+                        type="text"
+                        maxLength={4}
+                        className="input w-16 text-center"
+                        required
+                      />
+                      <input
+                        type="text"
+                        maxLength={4}
+                        className="input w-16 text-center"
+                        required
+                      />
+                      <input
+                        type="text"
+                        maxLength={4}
+                        className="input w-16 text-center"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* 만료일 + CVC */}
+                  <div className="flex flex-wrap sm:flex-nowrap space-x-4">
+                    {/* 만료일 */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        카드 번호
+                        만료일 (MM/YY)
                       </label>
                       <div className="flex space-x-2">
                         <input
                           type="text"
-                          maxLength={4}
-                          className="input w-16 text-center"
+                          maxLength={2}
+                          className="input w-14 text-center"
+                          placeholder="MM"
                           required
                         />
+                        <span className="mt-2">/</span>
                         <input
                           type="text"
-                          maxLength={4}
-                          className="input w-16 text-center"
-                          required
-                        />
-                        <input
-                          type="text"
-                          maxLength={4}
-                          className="input w-16 text-center"
-                          required
-                        />
-                        <input
-                          type="text"
-                          maxLength={4}
-                          className="input w-16 text-center"
+                          maxLength={2}
+                          className="input w-14 text-center"
+                          placeholder="YY"
                           required
                         />
                       </div>
                     </div>
+                  </div>
 
-                    {/* 은행 선택 */}
+                    {/* CVC */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        은행 선택
+                        CVC
                       </label>
-                      <select className="input w-full" required>
-                        <option value="">은행을 선택하세요</option>
-                        <option value="shinhan">신한은행</option>
-                        <option value="kb">국민은행</option>
-                        <option value="hana">하나은행</option>
-                        <option value="woori">우리은행</option>
-                        <option value="ibk">IBK기업은행</option>
-                        <option value="kakao">카카오뱅크</option>
-                        <option value="toss">토스뱅크</option>
-                      </select>
+                      <input
+                        type="text"
+                        maxLength={4}
+                        className="input w-32 text-center"
+                        placeholder="3자리"
+                        required
+                      />
                     </div>
+                  {/* 은행 선택 */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      은행 선택
+                    </label>
+                    <select className="input w-full" required>
+                      <option value="">은행을 선택하세요</option>
+                      <option value="shinhan">신한은행</option>
+                      <option value="kb">국민은행</option>
+                      <option value="hana">하나은행</option>
+                      <option value="woori">우리은행</option>
+                      <option value="ibk">IBK기업은행</option>
+                      <option value="kakao">카카오뱅크</option>
+                      <option value="toss">토스뱅크</option>
+                    </select>
+                  </div>
 
-                    {/* 제출 버튼 */}
-                    <button type="submit" className="btn-primary">
-                      카드 등록
-                    </button>
+                  {/* 제출 버튼 */}
+                  <button type="submit" className="btn-primary">
+                    카드 등록
+                  </button>
                 </div>
               )}
             </div>

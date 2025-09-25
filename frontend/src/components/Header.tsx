@@ -103,16 +103,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {/* 🔍 통합 검색바 (md: 이상에서만 표시) */}
           <div className="relative hidden md:block">
             {/* 🎨 검색 아이콘: input 내부 좌측에 절대 위치 */}
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
+            {/* <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" /> */}
 
-            {/* 📝 검색 입력 필드: 채용공고 및 기업명 통합 검색 */}
+            {/* 📝 검색 입력 필드: 채용공고 및 기업명 통합 검색
             <input
               type="text"
               placeholder="채용공고, 기업명 검색..."
               className="pl-10 pr-4 py-2 w-80 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent"
               aria-label="채용공고 및 기업명 검색"
               role="searchbox"
-            />
+            /> */}
           </div>
         </div>
 

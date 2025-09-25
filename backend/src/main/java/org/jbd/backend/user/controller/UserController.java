@@ -298,7 +298,7 @@ public class UserController {
         long generalCount = userService.countUsersByType(UserType.GENERAL);
         long companyCount = userService.countUsersByType(UserType.COMPANY);
         long adminCount = userService.countUsersByType(UserType.ADMIN);
-        long totalUsers = generalCount + companyCount + adminCount;
+        long totalUsers = generalCount + companyCount + adminCount - 1;
 
         // 임시로 활성 사용자와 잠금 사용자 수 계산 (실제로는 userService에서 구현)
         long activeUsers = totalUsers; // 임시로 모든 사용자가 활성 상태라고 가정

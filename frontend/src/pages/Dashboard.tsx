@@ -287,7 +287,7 @@ const GeneralUserDashboardComponent = () => {
       </div>
 
       {/* 메인 통계 카드 */}
-      <section aria-labelledby="main-stats" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <section aria-labelledby="main-stats" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
         <h2 id="main-stats" className="sr-only">주요 통계 정보</h2>
         <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
@@ -303,7 +303,7 @@ const GeneralUserDashboardComponent = () => {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+        {/* <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -315,7 +315,7 @@ const GeneralUserDashboardComponent = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
@@ -331,7 +331,7 @@ const GeneralUserDashboardComponent = () => {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+        {/* <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -343,7 +343,7 @@ const GeneralUserDashboardComponent = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </section>
 
       {/* 새로운 분석 섹션 */}
@@ -616,7 +616,7 @@ const GeneralUserDashboardComponent = () => {
                   </div>
                 ))}
 
-                {/* 개선 제안 */}
+                {/* 개선 제안
                 <div className="mt-6 p-4 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg text-white">
                   <div className="flex items-center gap-2 mb-2">
                     <Target className="w-4 h-4" />
@@ -640,16 +640,18 @@ const GeneralUserDashboardComponent = () => {
                       }
                     })()}
                   </p>
-                </div>
+                </div> */}
               </div>
             </div>
           </CardContent>
         </Card>
+      </div>
 
+      <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
         {/* 3. 맞춤 활동 추천 */}
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-1">
               <BookOpen className="w-5 h-5 text-green-600" />
               맞춤 활동 추천
             </CardTitle>
@@ -678,7 +680,7 @@ const GeneralUserDashboardComponent = () => {
           </CardContent>
         </Card>
 
-        {/* 4. 지원 현황 파이 차트 */}
+        {/* 4. 지원 현황 파이 차트
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -727,13 +729,11 @@ const GeneralUserDashboardComponent = () => {
               ))}
             </div>
           </CardContent>
-        </Card>
-      </div>
+        </Card> */}
+      {/* </div> */}
 
-      {/* 직무별 취업률 및 월별 진행 상황 */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        
-        {/* 직무별 취업률 */}
+{/*         
+        직무별 취업률
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -773,9 +773,9 @@ const GeneralUserDashboardComponent = () => {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        {/* 월별 진행 상황 */}
+        {/* 월별 진행 상황
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -857,10 +857,11 @@ const GeneralUserDashboardComponent = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
+
       </div>
 
-      {/* 빠른 실행 메뉴 */}
+      {/* 빠른 실행 메뉴
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle>빠른 실행</CardTitle>
@@ -893,7 +894,7 @@ const GeneralUserDashboardComponent = () => {
             </Link>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }
@@ -981,7 +982,7 @@ const CompanyDashboardComponent = () => {
       </div>
 
       {/* 메인 통계 카드 */}
-      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -997,7 +998,7 @@ const CompanyDashboardComponent = () => {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+        {/* <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -1010,7 +1011,7 @@ const CompanyDashboardComponent = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
@@ -1042,10 +1043,8 @@ const CompanyDashboardComponent = () => {
           </CardContent>
         </Card>
       </section>
-
-      {/* 지원자 현황 분석 및 인기 공고 */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* 지원자 현황 분석 */}
+      <div className="grid grid-cols-1 xl:grid-cols-1 gap-6">
+        {/* 지원자 현황 분석
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -1094,7 +1093,7 @@ const CompanyDashboardComponent = () => {
               </div>
             )}
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* 인기 채용공고 */}
         <Card className="shadow-lg">
@@ -1197,7 +1196,7 @@ const CompanyDashboardComponent = () => {
         </CardContent>
       </Card>
 
-      {/* 빠른 실행 메뉴 */}
+      {/* 빠른 실행 메뉴
       <Card className="shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -1236,7 +1235,7 @@ const CompanyDashboardComponent = () => {
             </Link>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   )
 }

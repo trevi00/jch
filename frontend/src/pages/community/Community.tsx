@@ -114,7 +114,7 @@ export default function Community() {
         </div>
         {canCreatePost() && (
           <Link to="/community/new" className="btn-primary">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-5 h-4 mr-2" />
             글 작성
           </Link>
         )}

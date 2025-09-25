@@ -292,14 +292,17 @@ export default function Settings() {
                 </div>
               )}
 
-{activeTab === 'account' && (
+              {activeTab === "account" && (
                 <div>
                   <h2 className="text-lg font-semibold mb-4">계정 관리</h2>
                   <div className="space-y-6">
                     <div className="p-4 bg-yellow-50 rounded-lg">
-                      <h3 className="font-medium text-yellow-800 mb-2">계정 삭제</h3>
+                      <h3 className="font-medium text-yellow-800 mb-2">
+                        계정 삭제
+                      </h3>
                       <p className="text-sm text-yellow-700 mb-3">
-                        계정을 삭제하면 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.
+                        계정을 삭제하면 모든 데이터가 영구적으로 삭제되며 복구할
+                        수 없습니다.
                       </p>
                       <button className="btn-outline text-red-600 border-red-600 hover:bg-red-50">
                         계정 삭제
@@ -381,19 +384,19 @@ export default function Settings() {
                     </div>
                   </div>
 
-                    {/* CVC */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        CVC
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={4}
-                        className="input w-32 text-center"
-                        placeholder="3자리"
-                        required
-                      />
-                    </div>
+                  {/* CVC */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      CVC
+                    </label>
+                    <input
+                      type="text"
+                      maxLength={4}
+                      className="input w-32 text-center"
+                      placeholder="3자리"
+                      required
+                    />
+                  </div>
                   {/* 은행 선택 */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -409,7 +412,9 @@ export default function Settings() {
                       <option value="kakao">카카오뱅크</option>
                       <option value="toss">토스뱅크</option>
                     </select>
+                    
                   </div>
+
 
                   {/* 제출 버튼 */}
                   <button type="submit" className="btn-primary">

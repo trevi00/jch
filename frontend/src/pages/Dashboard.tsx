@@ -275,7 +275,7 @@ const GeneralUserDashboardComponent = () => {
               ) : (
                 <RefreshCw className="w-4 h-4" aria-hidden="true" />
               )}
-              {isRefetching ? '새로고림 중...' : '새로고침'}
+              {isRefetching ? '새로고침 중...' : '새로고침'}
             </Button>
             {dashboard && (
               <Badge variant="secondary" className="text-xs">
@@ -433,7 +433,7 @@ const GeneralUserDashboardComponent = () => {
                   </div>
 
                   {/* 평균 점수 마커 */}
-                  <div
+                  {/* <div
                     className="absolute top-0 h-4 w-1 bg-yellow-500 rounded-full"
                     style={{ left: '65%' }}
                   >
@@ -442,10 +442,10 @@ const GeneralUserDashboardComponent = () => {
                         평균: 65점
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* 목표 점수 마커 */}
-                  <div
+                  {/* <div
                     className="absolute top-0 h-4 w-1 bg-green-500 rounded-full"
                     style={{ left: '85%' }}
                   >
@@ -454,12 +454,12 @@ const GeneralUserDashboardComponent = () => {
                         목표: 85점
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
               {/* 분석 결과 */}
-              <div className="grid grid-cols-3 gap-3 mt-6">
+              <div className="grid grid-cols-2 gap-3 mt-6">
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{dashboard?.myJobScore || 0}</div>
                   <div className="text-xs text-blue-700">나의 점수</div>
@@ -474,13 +474,13 @@ const GeneralUserDashboardComponent = () => {
                     {(dashboard?.myJobScore || 0) >= 65 ? '평균 이상' : '평균 이하'}
                   </div>
                 </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
+                {/* <div className="text-center p-3 bg-green-50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">85</div>
                   <div className="text-xs text-green-700">목표 점수</div>
                   <div className="text-xs text-green-500 mt-1">
                     {Math.max(0, 85 - (dashboard?.myJobScore || 0))}점 필요
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* AI 분석 피드백 */}
@@ -1166,10 +1166,10 @@ const CompanyDashboardComponent = () => {
                         <span className="text-gray-500">급여:</span>
                         <span className="ml-2 font-medium">{job.minSalary}-{job.maxSalary}만원</span>
                       </div>
-                      <div>
+                      {/* <div>
                         <span className="text-gray-500">지원자:</span>
                         <span className="ml-2 font-medium text-blue-600">{job.applicationCount}명</span>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">

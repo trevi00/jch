@@ -43,9 +43,10 @@ public class ProfileController {
     
     // 기본 프로필 조회
     @GetMapping
-    public ResponseEntity<ApiResponse<Object>> getProfile(@RequestHeader("Authorization") String token) {
-        Long userId = jwtService.extractUserId(token.replace("Bearer ", ""));
-        
+    public ResponseEntity<ApiResponse<Object>> getProfile(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
+
         try {
             // 일단 기본적인 프로필 정보를 Map으로 반환
             java.util.Map<String, Object> profileData = new java.util.HashMap<>();
@@ -73,9 +74,10 @@ public class ProfileController {
     @PostMapping("/education")
     public ResponseEntity<ApiResponse<Education>> addEducation(
             @RequestBody @Validated EducationCreateDto dto,
-            Authentication authentication) {
-        
-        Long userId = getUserIdFromAuth(authentication);
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         
         Education education = profileService.addEducation(
             userId, dto.getEducationLevel(), dto.getSchoolName(), dto.getMajor(),
@@ -87,10 +89,11 @@ public class ProfileController {
     }
     
     @GetMapping("/education")
-    public ResponseEntity<ApiResponse<List<Education>>> getEducationList(Authentication authentication) {
-        Long userId = getUserIdFromAuth(authentication);
+    public ResponseEntity<ApiResponse<List<Education>>> getEducationList(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         List<Education> educations = profileService.getEducationList(userId);
-        
+
         return ResponseEntity.ok(ApiResponse.success("교육 이력 목록을 조회했습니다.", educations));
     }
     
@@ -118,9 +121,10 @@ public class ProfileController {
     @PostMapping("/skills")
     public ResponseEntity<ApiResponse<SkillDto>> addSkill(
             @RequestBody @Validated SkillCreateDto dto,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
 
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
 
         UserSkill userSkill = profileService.addSkill(
             userId, dto.getSkillName(), dto.getSkillCategory(), dto.getSkillLevel(),
@@ -134,9 +138,10 @@ public class ProfileController {
     @GetMapping("/skills")
     public ResponseEntity<ApiResponse<List<SkillDto>>> getSkillList(
             @RequestParam(required = false) SkillCategory category,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
 
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
 
         List<UserSkill> userSkills = category != null
             ? profileService.getSkillListByCategory(userId, category)
@@ -173,9 +178,10 @@ public class ProfileController {
     @PostMapping("/certifications")
     public ResponseEntity<ApiResponse<Certification>> addCertification(
             @RequestBody @Validated CertificationCreateDto dto,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
         
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         
         Certification certification = profileService.addCertification(
             userId, dto.getCertificationName(), dto.getIssuingOrganization(),
@@ -190,9 +196,10 @@ public class ProfileController {
     @GetMapping("/certifications")
     public ResponseEntity<ApiResponse<List<Certification>>> getCertificationList(
             @RequestParam(defaultValue = "false") boolean activeOnly,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
         
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         
         List<Certification> certifications = activeOnly
             ? profileService.getActiveCertifications(userId)
@@ -226,9 +233,10 @@ public class ProfileController {
     @PostMapping("/portfolios")
     public ResponseEntity<ApiResponse<Portfolio>> addPortfolio(
             @RequestBody @Validated PortfolioCreateDto dto,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
         
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         
         Portfolio portfolio = profileService.addPortfolio(
             userId, dto.getTitle(), dto.getDescription(), dto.getPortfolioType(),
@@ -244,9 +252,10 @@ public class ProfileController {
     @GetMapping("/portfolios")
     public ResponseEntity<ApiResponse<List<Portfolio>>> getPortfolioList(
             @RequestParam(defaultValue = "false") boolean featuredOnly,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
         
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         
         List<Portfolio> portfolios = featuredOnly
             ? profileService.getFeaturedPortfolios(userId)
@@ -298,9 +307,10 @@ public class ProfileController {
     @PostMapping("/experiences")
     public ResponseEntity<ApiResponse<ExperienceDto>> addExperience(
             @RequestBody @Validated ExperienceCreateDto dto,
-            Authentication authentication) {
+            @RequestHeader("Authorization") String authHeader) {
 
-        Long userId = getUserIdFromAuth(authentication);
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
 
         CareerHistory careerHistory = profileService.addExperience(
             userId, dto.getCompanyName(), dto.getPosition(), dto.getDepartment(),
@@ -328,8 +338,9 @@ public class ProfileController {
      * @see ExperienceDto
      */
     @GetMapping("/experiences")
-    public ResponseEntity<ApiResponse<List<ExperienceDto>>> getExperienceList(Authentication authentication) {
-        Long userId = getUserIdFromAuth(authentication);
+    public ResponseEntity<ApiResponse<List<ExperienceDto>>> getExperienceList(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long userId = jwtService.extractUserId(token);
         List<CareerHistory> careerHistories = profileService.getExperienceList(userId);
 
         List<ExperienceDto> experienceDtos = careerHistories.stream()
@@ -394,14 +405,8 @@ public class ProfileController {
      * @see JwtService
      * @see Authentication
      */
-    private Long getUserIdFromAuth(Authentication authentication) {
-        // Principal에서 사용자 이메일 추출 후 사용자 조회하거나,
-        // JWT 토큰에서 직접 userId 추출
-        // 현재는 테스트를 위해 임시 구현 (실제로는 JWT에서 userId 추출해야 함)
-        if (authentication != null && authentication.getName() != null) {
-            // 실제 구현에서는 JwtService를 사용하여 토큰에서 userId 추출
-            return 1L; // 존재하는 테스트 사용자 ID
-        }
-        return 1L;
+    private Long getUserIdFromToken(String authHeader) {
+        String token = authHeader.substring(7);
+        return jwtService.extractUserId(token);
     }
 }

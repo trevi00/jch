@@ -113,7 +113,7 @@ export default function Community() {
           <p className="text-gray-600">동료들과 정보를 공유하고 소통하세요!</p>
         </div>
         {canCreatePost() && (
-          <Link to="/community/new" className="btn-primary">
+          <Link to="/community/new" className="btn-primary px-4 py-2.5">
             <Plus className="w-4 h-4 mr-2" />
             글 작성
           </Link>

@@ -131,7 +131,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   }
 
   const sidebarClasses = `
-    fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 pt-16 z-40
+    fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 pt-20 z-40
     transform transition-transform duration-300 ease-in-out
     ${isMobile ? (isOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}
   `
@@ -159,7 +159,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
         )}
 
         <nav
-          className="p-4 space-y-2 overflow-y-auto h-full pb-20"
+          className="p-4 space-y-2 overflow-y-auto h-full pb-4"
           role="navigation"
           aria-label="주요 메뉴"
         >
@@ -188,8 +188,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
                   <div
                     id={`submenu-${item.title.replace(/\s+/g, '-')}`}
-                    className={`ml-8 space-y-1 overflow-hidden transition-all duration-200 ${
-                      expandedItems.includes(item.title) ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                    className={`ml-4 mr-2 space-y-2 overflow-visible transition-all duration-200 ${
+                      expandedItems.includes(item.title) ? 'max-h-80 opacity-100 py-2' : 'max-h-0 opacity-0'
                     }`}
                     role="menu"
                     aria-label={`${item.title} 하위 메뉴`}
@@ -203,7 +203,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           key={subItem.path}
                           to={subItem.path}
                           onClick={isMobile ? onClose : undefined}
-                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+                          className={`flex items-center px-2 py-1.5 text-sm rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
                             location.pathname === subItem.path
                               ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600 dark:border-primary-400 font-medium'
                               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
@@ -211,18 +211,18 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           role="menuitem"
                           aria-current={location.pathname === subItem.path ? 'page' : undefined}
                         >
-                          <subItem.icon className="w-4 h-4 mr-3" />
+                          <subItem.icon className="w-4 h-4 mr-2" />
                           {subItem.title}
                         </Link>
                       ) : (
                         <div
                           key={subItem.path}
-                          className="flex items-center px-3 py-2 text-sm rounded-lg text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
+                          className="flex items-center px-2 py-1.5 text-sm rounded-lg text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
                           role="menuitem"
                           aria-disabled="true"
                           title={disabledMessage}
                         >
-                          <subItem.icon className="w-4 h-4 mr-3" />
+                          <subItem.icon className="w-4 h-4 mr-2" />
                           <span>{subItem.title}</span>
                           <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
                             개인회원 전용

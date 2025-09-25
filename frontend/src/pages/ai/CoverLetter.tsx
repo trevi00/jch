@@ -63,8 +63,8 @@ export default function CoverLetter() {
           {/* 인터랙티브 생성 모드 */}
           <Card className="cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105">
             <CardHeader className="text-center">
-              <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <Brain className="w-8 h-8 text-purple-600" />
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Brain className="w-8 h-8 text-blue-600" />
               </div>
               <CardTitle className="text-xl">AI 자기소개서 생성</CardTitle>
               <p className="text-sm text-gray-600">
@@ -74,25 +74,25 @@ export default function CoverLetter() {
             <CardContent className="space-y-4">
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>단계별 질문 응답</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>개인화된 맞춤 생성</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>섹션별 전문 분석</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                   <span>고품질 결과물</span>
                 </div>
               </div>
               <Button 
                 onClick={() => setMode('interactive')}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-blue-600 hover:bg-purple-700"
               >
                 자기소개서 생성 시작
               </Button>
@@ -111,7 +111,7 @@ export default function CoverLetter() {
                 <thead>
                   <tr className="border-b">
                     <th className="text-left p-2">구분</th>
-                    <th className="text-center p-2 text-purple-600">자기소개서 생성</th>
+                    <th className="text-center p-2 text-blue-600">자기소개서 생성</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm">

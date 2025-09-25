@@ -2,6 +2,7 @@ package org.jbd.backend.user.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.jbd.backend.common.entity.BaseEntity;
 import org.jbd.backend.user.domain.enums.EmploymentStatus;
 import org.jbd.backend.user.domain.enums.UserType;
@@ -42,6 +43,8 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "users")
+@Getter
+@Setter
 public class User extends BaseEntity {
 
     @Id
@@ -79,6 +82,10 @@ public class User extends BaseEntity {
     @Column(name = "company_email_verified", nullable = false)
     private Boolean companyEmailVerified = false;
 
+    private String name;
+
+    private String phoneNumber;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
@@ -87,10 +94,12 @@ public class User extends BaseEntity {
 
     public User() {}
 
-    public User(String email, String passwordHash, UserType userType) {
+    public User(String email, String passwordHash, UserType userType, String name, String phoneNumber) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.userType = userType;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
         this.oauthProvider = OAuthProvider.NATIVE;
     }
 

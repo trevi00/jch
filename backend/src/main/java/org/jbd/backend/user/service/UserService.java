@@ -102,7 +102,9 @@ public class UserService {
         User user = new User(
                 registrationDto.getEmail(),
                 encodedPassword,
-                registrationDto.getUserType()
+                registrationDto.getUserType(),
+                registrationDto.getName(),
+                registrationDto.getPhoneNumber()
         );
 
         User savedUser = userRepository.save(user);
@@ -459,5 +461,10 @@ public class UserService {
 
         // 실제 계정 잠금 기능을 위해서는 스키마에 lock_until 필드 추가 또는 별도 테이블 사용 가능
         logger.info("계정 잠금이 해제되었습니다. userId: {}", userId);
+    }
+
+    public User findByUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 }

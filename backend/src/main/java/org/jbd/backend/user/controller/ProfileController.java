@@ -1,5 +1,6 @@
 package org.jbd.backend.user.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.jbd.backend.common.dto.ApiResponse;
 import org.jbd.backend.user.domain.*;
 import org.jbd.backend.user.domain.enums.*;
@@ -7,6 +8,7 @@ import org.jbd.backend.user.dto.*;
 import org.jbd.backend.user.dto.profile.*;
 import org.jbd.backend.user.service.ProfileService;
 import org.jbd.backend.auth.service.JwtService;
+import org.jbd.backend.user.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -31,21 +33,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/profile")
 @Validated
+@RequiredArgsConstructor
 public class ProfileController {
     
     private final ProfileService profileService;
     private final JwtService jwtService;
-    
-    public ProfileController(ProfileService profileService, JwtService jwtService) {
-        this.profileService = profileService;
-        this.jwtService = jwtService;
-    }
-    
+    private final UserService userService;
+
     // 기본 프로필 조회
     @GetMapping
     public ResponseEntity<ApiResponse<Object>> getProfile(@RequestHeader("Authorization") String token) {
         Long userId = jwtService.extractUserId(token.replace("Bearer ", ""));
-        
+
+
         try {
             // 일단 기본적인 프로필 정보를 Map으로 반환
             java.util.Map<String, Object> profileData = new java.util.HashMap<>();
@@ -56,7 +56,6 @@ public class ProfileController {
             profileData.put("certificationsCount", profileService.getCertificationList(userId).size());
             profileData.put("portfoliosCount", profileService.getPortfolioList(userId).size());
             profileData.put("experiencesCount", profileService.getExperienceList(userId).size());
-            
             return ResponseEntity.ok(ApiResponse.success("프로필 정보를 조회했습니다.", profileData));
         } catch (Exception e) {
             // 임시 응답 반환

@@ -287,7 +287,7 @@ const GeneralUserDashboardComponent = () => {
       </div>
 
       {/* 메인 통계 카드 */}
-      <section aria-labelledby="main-stats" className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+      <section aria-labelledby="main-stats" className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
         <h2 id="main-stats" className="sr-only">주요 통계 정보</h2>
         <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
@@ -303,11 +303,11 @@ const GeneralUserDashboardComponent = () => {
           </CardContent>
         </Card>
 
-        {/* <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+        <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">면접 진행</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">최신 공고</p>
                 <p className="text-3xl font-bold text-gray-900">{dashboard?.myApplicationStatus?.interviewApplications || 0}</p>
               </div>
               <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg">
@@ -315,9 +315,9 @@ const GeneralUserDashboardComponent = () => {
               </div>
             </div>
           </CardContent>
-        </Card> */}
+        </Card>
 
-        <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
+        {/* <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -329,7 +329,7 @@ const GeneralUserDashboardComponent = () => {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* <Card className="hover:shadow-lg transition-all duration-300 border-0 shadow-md">
           <CardContent className="p-6">
@@ -354,7 +354,7 @@ const GeneralUserDashboardComponent = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-blue-600" />
-              취업 준비도 분석
+              나의 현 상황
             </CardTitle>
             <p className="text-sm text-gray-600 mt-1">
               나의 취업 준비 점수를 정규분포로 분석하여 위치를 확인합니다

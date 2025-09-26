@@ -699,7 +699,17 @@ class ApiClient {
    * 이벤트: 기업 지원자 목록 조회 API 호출 이벤트
    */
   async getJobApplications(jobPostingId: number, page = 0, size = 20): Promise<ApiResponse<PageResponse<JobApplication>>> {
+    console.log('🌐 API Call - getJobApplications:', jobPostingId, 'page:', page, 'size:', size);
     const response = await this.api.get<ApiResponse<PageResponse<JobApplication>>>(`/api/applications/job/${jobPostingId}?page=${page}&size=${size}`);
+    console.log('📨 API Response - getJobApplications:', {
+      success: response.data.success,
+      message: response.data.message,
+      dataType: typeof response.data.data,
+      dataKeys: response.data.data ? Object.keys(response.data.data) : null,
+      contentLength: response.data.data?.content?.length || 0,
+      sampleApplicant: response.data.data?.content?.[0] || response.data.data?.[0] || null,
+      fullData: response.data
+    });
     return response.data;
   }
 

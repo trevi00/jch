@@ -11,6 +11,13 @@ import org.jbd.backend.user.domain.User;
 import org.jbd.backend.user.domain.enums.UserType;
 import org.jbd.backend.user.dto.UserResponseDto;
 import org.jbd.backend.user.service.UserService;
+import org.jbd.backend.job.dto.JobPostingResponseDto;
+import org.jbd.backend.job.dto.JobPostingCreateDto;
+import org.jbd.backend.job.dto.JobPostingUpdateDto;
+import org.jbd.backend.job.service.JobPostingService;
+import org.jbd.backend.job.domain.JobPosting;
+import org.jbd.backend.community.dto.PostDto;
+import org.jbd.backend.community.service.PostService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +32,8 @@ public class AdminController {
     private final UserService userService;
     private final JwtService jwtService;
     private final DashboardService dashboardService;
+    private final JobPostingService jobPostingService;
+    private final PostService postService;
 
     @Value("${app.admin.secret-key:ADMIN_SECRET_2024}")
     private String adminSecretKey;
@@ -243,6 +252,277 @@ public class AdminController {
             log.error("Admin get user statistics failed, error: {}", e.getMessage());
             return ResponseEntity.status(500)
                 .body(ApiResponse.error("사용자 통계 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    // =========================== 채용공고 관리 (Admin) ===========================
+
+    /**
+     * 모든 채용공고 조회 (관리자용)
+     */
+    @GetMapping("/job-postings")
+    public ResponseEntity<ApiResponse<java.util.List<JobPostingResponseDto>>> getAllJobPostings(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            // 어드민 권한 검증
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 모든 채용공고 조회
+            var jobPostings = jobPostingService.getPublishedJobPostings(
+                org.springframework.data.domain.PageRequest.of(page, size));
+
+            return ResponseEntity.ok(ApiResponse.success("모든 채용공고 조회 성공", jobPostings.getContent().stream()
+                .map(JobPostingResponseDto::from)
+                .collect(java.util.stream.Collectors.toList())));
+
+        } catch (Exception e) {
+            log.error("Admin get all job postings failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("채용공고 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 채용공고 생성 (관리자용)
+     */
+    @PostMapping("/job-postings")
+    public ResponseEntity<ApiResponse<JobPostingResponseDto>> createJobPosting(
+            @RequestHeader("Authorization") String token,
+            @RequestBody JobPostingCreateDto request) {
+        try {
+            // 어드민 권한 검증
+            String userEmail = extractUserEmailFromToken(token);
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 관리자용 채용공고 생성 - 임시로 간단한 구조 사용
+            User adminUser = userService.findUserByEmail(userEmail);
+            JobPosting jobPosting = jobPostingService.createJobPosting(
+                adminUser.getId(),
+                request.getTitle(),
+                request.getCompanyName(),
+                request.getLocation(),
+                request.getJobType(),
+                request.getExperienceLevel(),
+                request.getDescription(),
+                request.getMinSalary(),
+                request.getMaxSalary()
+            );
+
+            JobPostingResponseDto response = JobPostingResponseDto.from(jobPosting);
+
+            return ResponseEntity.ok(ApiResponse.success("채용공고 생성 성공", response));
+
+        } catch (Exception e) {
+            log.error("Admin create job posting failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("채용공고 생성 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 채용공고 수정 (관리자용)
+     */
+    @PutMapping("/job-postings/{jobId}")
+    public ResponseEntity<ApiResponse<JobPostingResponseDto>> updateJobPosting(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long jobId,
+            @RequestBody JobPostingUpdateDto request) {
+        try {
+            // 어드민 권한 검증
+            String userEmail = extractUserEmailFromToken(token);
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 채용공고 수정 (관리자는 모든 채용공고 수정 가능)
+            JobPosting jobPosting = jobPostingService.updateJobPosting(jobId, request);
+            JobPostingResponseDto response = JobPostingResponseDto.from(jobPosting);
+
+            return ResponseEntity.ok(ApiResponse.success("채용공고 수정 성공", response));
+
+        } catch (Exception e) {
+            log.error("Admin update job posting failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("채용공고 수정 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 채용공고 삭제 (관리자용)
+     */
+    @DeleteMapping("/job-postings/{jobId}")
+    public ResponseEntity<ApiResponse<Void>> deleteJobPosting(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long jobId) {
+        try {
+            // 어드민 권한 검증
+            String userEmail = extractUserEmailFromToken(token);
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 채용공고 삭제 (관리자는 모든 채용공고 삭제 가능)
+            jobPostingService.deleteJobPosting(jobId);
+
+            return ResponseEntity.ok(ApiResponse.success("채용공고 삭제 성공"));
+
+        } catch (Exception e) {
+            log.error("Admin delete job posting failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("채용공고 삭제 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    // =========================== 커뮤니티 관리 (Admin) ===========================
+
+    /**
+     * 모든 게시글 조회 (관리자용)
+     */
+    @GetMapping("/posts")
+    public ResponseEntity<ApiResponse<PostDto.PageResponse>> getAllPosts(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        try {
+            // 어드민 권한 검증
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 모든 게시글 조회
+            PostDto.PageResponse posts = postService.getAllPosts(
+                org.springframework.data.domain.PageRequest.of(page, size));
+
+            return ResponseEntity.ok(ApiResponse.success("모든 게시글 조회 성공", posts));
+
+        } catch (Exception e) {
+            log.error("Admin get all posts failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("게시글 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 공지사항 게시글 생성 (관리자 전용)
+     */
+    @PostMapping("/posts/notice")
+    public ResponseEntity<ApiResponse<PostDto.Response>> createNoticePost(
+            @RequestHeader("Authorization") String token,
+            @RequestBody PostDto.CreateRequest request) {
+        try {
+            // 어드민 권한 검증
+            String userEmail = extractUserEmailFromToken(token);
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 공지사항 게시글 생성 (카테고리를 공지로 설정)
+            PostDto.Response post = postService.createPost(request, userEmail);
+
+            return ResponseEntity.ok(ApiResponse.success("공지사항 생성 성공", post));
+
+        } catch (Exception e) {
+            log.error("Admin create notice post failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("공지사항 생성 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 게시글 수정 (관리자용)
+     */
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponse<PostDto.Response>> updatePost(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long postId,
+            @RequestBody PostDto.UpdateRequest request) {
+        try {
+            // 어드민 권한 검증
+            String userEmail = extractUserEmailFromToken(token);
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 게시글 수정 (관리자는 모든 게시글 수정 가능)
+            PostDto.Response post = postService.updatePost(postId, request, userEmail);
+
+            return ResponseEntity.ok(ApiResponse.success("게시글 수정 성공", post));
+
+        } catch (Exception e) {
+            log.error("Admin update post failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("게시글 수정 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 게시글 삭제 (관리자용)
+     */
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponse<Void>> deletePost(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long postId) {
+        try {
+            // 어드민 권한 검증
+            String userEmail = extractUserEmailFromToken(token);
+            if (!verifyAdminToken(token)) {
+                return ResponseEntity.status(403)
+                    .body(ApiResponse.error("관리자 권한이 없습니다."));
+            }
+
+            // 게시글 삭제 (관리자는 모든 게시글 삭제 가능)
+            postService.deletePost(postId, userEmail);
+
+            return ResponseEntity.ok(ApiResponse.success("게시글 삭제 성공"));
+
+        } catch (Exception e) {
+            log.error("Admin delete post failed, error: {}", e.getMessage());
+            return ResponseEntity.status(500)
+                .body(ApiResponse.error("게시글 삭제 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    // =========================== 공통 헬퍼 메서드 ===========================
+
+    /**
+     * 관리자 토큰 검증
+     */
+    private boolean verifyAdminToken(String token) {
+        try {
+            String jwt = token.replace("Bearer ", "");
+            String userEmail = jwtService.extractUsername(jwt);
+            User user = userService.findUserByEmail(userEmail);
+
+            return user != null && user.getUserType() == UserType.ADMIN;
+        } catch (Exception e) {
+            log.error("Admin token verification failed: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 토큰에서 사용자 이메일 추출
+     */
+    private String extractUserEmailFromToken(String token) {
+        try {
+            String jwt = token.replace("Bearer ", "");
+            return jwtService.extractUsername(jwt);
+        } catch (Exception e) {
+            log.error("Token email extraction failed: {}", e.getMessage());
+            return null;
         }
     }
 

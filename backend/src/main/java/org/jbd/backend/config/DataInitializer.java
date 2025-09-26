@@ -2,21 +2,30 @@ package org.jbd.backend.config;
 
 import org.jbd.backend.community.domain.Category;
 import org.jbd.backend.community.repository.CategoryRepository;
+import org.jbd.backend.user.domain.User;
+import org.jbd.backend.user.domain.enums.UserType;
+import org.jbd.backend.user.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
 
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(CategoryRepository categoryRepository) {
+    public DataInitializer(CategoryRepository categoryRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.categoryRepository = categoryRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void run(String... args) throws Exception {
         initializeCategories();
+        initializeAdminUser();
     }
 
     private void initializeCategories() {
@@ -42,5 +51,22 @@ public class DataInitializer implements CommandLineRunner {
         
         categoryRepository.save(category);
         System.out.println("카테고리 생성: " + name);
+    }
+
+    private void initializeAdminUser() {
+        // 관리자 계정이 이미 존재하면 생성하지 않음
+        if (userRepository.findByEmail("admin2@test.com").isPresent()) {
+            return;
+        }
+
+        // 관리자 계정 생성
+        User adminUser = new User(
+                "admin2@test.com",
+                passwordEncoder.encode("admin123!"),
+                UserType.ADMIN
+        );
+
+        userRepository.save(adminUser);
+        System.out.println("✅ 관리자 계정 생성 완료: admin2@test.com / admin123!");
     }
 }

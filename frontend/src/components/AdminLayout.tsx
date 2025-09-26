@@ -97,6 +97,9 @@ export default function AdminLayout() {
     localStorage.removeItem('adminToken')
     localStorage.removeItem('adminRefreshToken')
     localStorage.removeItem('adminUser')
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    localStorage.removeItem('user')
 
     // 🚪 관리자 로그인 페이지로 이동
     navigate('/admin/login')

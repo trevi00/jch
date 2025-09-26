@@ -58,31 +58,37 @@ export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
           return
         }
 
-        // ✅ 토큰이 있으면 일단 접근 허용 (간단한 버전)
-        // 추후 서버 검증 로직 추가 가능
-        setHasAdminAccess(true)
-
-        // TODO: 서버에서 관리자 권한 검증 (선택적 구현)
-        /*
+        // ✅ 서버에서 관리자 권한 검증
         try {
-          const response = await apiClient.verifyAdminToken()
-          if (response.success) {
+          console.log('🔍 AdminRouteGuard: Checking admin access...')
+          const response = await apiClient.getCurrentUser()
+          console.log('📥 AdminRouteGuard: getCurrentUser response:', response)
+
+          if (response.success && response.data && response.data.userType === 'ADMIN') {
+            console.log('✅ AdminRouteGuard: Admin access granted')
             setHasAdminAccess(true)
           } else {
-            // 토큰이 유효하지 않으면 제거
+            console.log('❌ AdminRouteGuard: Admin access denied - not admin user')
+            // 관리자 권한이 없으면 토큰 제거
             localStorage.removeItem('adminToken')
             localStorage.removeItem('adminRefreshToken')
             localStorage.removeItem('adminUser')
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            localStorage.removeItem('user')
             setHasAdminAccess(false)
           }
         } catch (error) {
+          console.log('🚨 AdminRouteGuard: Server verification failed:', error)
           // 서버 검증 실패 시에도 접근 거부
           localStorage.removeItem('adminToken')
           localStorage.removeItem('adminRefreshToken')
           localStorage.removeItem('adminUser')
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('user')
           setHasAdminAccess(false)
         }
-        */
 
       } catch (error) {
         // 🚨 예외 발생 시 안전하게 접근 거부

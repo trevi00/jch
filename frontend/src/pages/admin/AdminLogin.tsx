@@ -112,8 +112,13 @@ export default function AdminLogin() {
         localStorage.setItem('adminToken', response.data.accessToken)
         localStorage.setItem('adminRefreshToken', response.data.refreshToken || '')
 
+        // 일반 API 호출을 위한 토큰도 저장 (백엔드 호환성)
+        localStorage.setItem('accessToken', response.data.accessToken)
+        localStorage.setItem('refreshToken', response.data.refreshToken || '')
+
         // 관리자 사용자 정보도 별도로 저장 (필요한 경우)
         localStorage.setItem('adminUser', JSON.stringify(response.data.user))
+        localStorage.setItem('user', JSON.stringify(response.data.user))
 
         navigate('/admin')                                         // 🏠 관리자 대시보드로 이동
       } else {

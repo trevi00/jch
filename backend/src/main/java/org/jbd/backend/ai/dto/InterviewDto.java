@@ -1,5 +1,6 @@
 package org.jbd.backend.ai.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -86,6 +87,7 @@ public class InterviewDto {
     @AllArgsConstructor
     public static class CompleteInterviewRequest {
         @JsonProperty("job_role")
+        @JsonAlias({"jobRole", "job_role"})
         private String jobRole;
         private List<QuestionData> questions;
         private List<AnswerData> answers;
@@ -105,6 +107,7 @@ public class InterviewDto {
     @AllArgsConstructor
     public static class AnswerData {
         @JsonProperty("question_id")
+        @JsonAlias({"questionId", "question_id"})
         private String questionId;
         private String answer;
         private FeedbackData feedback;

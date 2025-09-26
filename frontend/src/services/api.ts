@@ -265,10 +265,36 @@ class ApiClient {
    * 이벤트: 관리자 로그인 API 호출 이벤트, 관리자 인증 토큰 생성 이벤트
    */
   async adminLogin(username: string, password: string): Promise<ApiResponse<any>> {
-    const response = await this.api.post<ApiResponse<any>>('/api/admin/login', {
+    // 임시로 일반 로그인 엔드포인트를 사용하고 ADMIN 권한 확인
+    const response = await this.api.post<ApiResponse<any>>('/api/auth/login', {
       email: username,
       password: password
     });
+
+    // ADMIN 권한이 있는지 확인
+    if (response.data.success && response.data.data?.user?.userType !== 'ADMIN') {
+      return {
+        success: false,
+        message: '관리자 권한이 필요합니다.',
+        data: null
+      };
+    }
+
+    // 응답 데이터를 AdminLogin이 기대하는 형태로 변환
+    if (response.data.success && response.data.data) {
+      return {
+        success: true,
+        message: response.data.message,
+        data: {
+          user: response.data.data.user,
+          accessToken: response.data.data.access_token,  // access_token → accessToken
+          refreshToken: response.data.data.refresh_token, // refresh_token → refreshToken
+          tokenType: response.data.data.token_type || 'Bearer',
+          expiresIn: response.data.data.expires_in || 86400
+        }
+      };
+    }
+
     return response.data;
   }
 
@@ -1052,7 +1078,18 @@ class ApiClient {
   }
 
   async getAdminDashboard(): Promise<ApiResponse<any>> {
-    const response = await this.api.get<ApiResponse<any>>('/api/dashboard/admin');
+    // Use admin token specifically for admin dashboard
+    const adminToken = localStorage.getItem('adminToken');
+
+    if (!adminToken) {
+      throw new Error('No admin token found in localStorage');
+    }
+
+    const response = await this.api.get<ApiResponse<any>>('/api/dashboard/admin', {
+      headers: {
+        Authorization: `Bearer ${adminToken}`
+      }
+    });
     return response.data;
   }
 
@@ -1236,7 +1273,7 @@ export const aiClient = {
     return response.data;
   },
   completeInterview: async (data: any) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
 
     // For guest users, save to localStorage instead of backend
     if (!token) {
@@ -1264,16 +1301,28 @@ export const aiClient = {
       };
     }
 
-    // For authenticated users, save to backend
-    const response = await api.post('/ai/interview/complete', data, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-    return response.data;
+    // For authenticated users, save to BACKEND first
+    try {
+      const response = await apiClient.api.post('/api/ai/interview/complete', data);
+      return response.data;
+    } catch (error) {
+      console.error('Backend interview complete failed, fallback to AI service:', error);
+      // Fallback to AI service if backend fails
+      const aiApi = axios.create({
+        baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+        timeout: 60000,
+      });
+      const response = await aiApi.post('/interview/complete', {
+        jobRole: data.jobRole || data.job_role,
+        questions: data.questions,
+        answers: data.answers,
+        user_id: data.userId || 'authenticated_user'
+      });
+      return response.data;
+    }
   },
   getInterviewHistory: async (userId: string = 'guest') => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
 
     // For guest users, return interviews from localStorage
     if (!token) {
@@ -1320,20 +1369,99 @@ export const aiClient = {
       };
     }
 
-    // For authenticated users, fetch from backend
-    const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
-      timeout: 30000,
-    });
-    const response = await aiApi.get(`/interview/history?user_id=${userId}`);
-    return response.data;
+    // Helper function to convert backend date array to ISO string
+    const convertDateArrayToString = (dateArray: number[] | string) => {
+      if (typeof dateArray === 'string') return dateArray;
+      if (!Array.isArray(dateArray) || dateArray.length < 3) return new Date().toISOString();
+
+      // Convert [2025,9,25,21,6,27,821901000] format to ISO string
+      const [year, month, day, hour = 0, minute = 0, second = 0, nano = 0] = dateArray;
+      const date = new Date(year, month - 1, day, hour, minute, second, Math.floor(nano / 1000000));
+      return date.toISOString();
+    };
+
+    // For authenticated users, fetch from BACKEND (not AI service)
+    // Use the main API client which includes JWT token automatically
+    try {
+      const response = await apiClient.api.get('/api/ai/interview/history?page=0&size=50');
+      const backendData = response.data;
+
+      // Transform backend response to match frontend expectations
+      if (backendData?.content) {
+        const transformedContent = backendData.content.map((interview: any) => ({
+          interviewId: interview.id,
+          id: interview.id,
+          jobRole: interview.jobRole,
+          interviewType: interview.interviewType,
+          experienceLevel: interview.experienceLevel,
+          overallScore: Number(interview.overallScore || 0),
+          totalQuestions: interview.totalQuestions,
+          answeredQuestions: interview.answeredQuestions,
+          status: interview.status || 'COMPLETED',
+          completedAt: convertDateArrayToString(interview.completedAt),
+          createdAt: convertDateArrayToString(interview.createdAt),
+          questionCount: interview.questionCount || interview.totalQuestions,
+          // These will be fetched on-demand when user clicks detail view
+          questions: [],
+          answers: []
+        }));
+
+        return {
+          success: true,
+          data: {
+            content: transformedContent,
+            interviews: transformedContent, // For backward compatibility
+            totalElements: backendData.totalElements,
+            total: backendData.totalElements, // For backward compatibility
+            totalPages: backendData.totalPages,
+            last: backendData.last,
+            first: backendData.first,
+            number: backendData.number,
+            size: backendData.size,
+            numberOfElements: backendData.numberOfElements
+          }
+        };
+      }
+
+      return response.data;
+    } catch (error) {
+      console.error('Backend interview history fetch failed, fallback to AI service:', error);
+      // Fallback to AI service if backend fails
+      const aiApi = axios.create({
+        baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+        timeout: 30000,
+      });
+      const response = await aiApi.get(`/interview/history?user_id=${userId}`);
+      return response.data;
+    }
   },
-  getAIReview: async (interviewId: number) => {
+  getAIReview: async (interviewId: number, userId?: string) => {
     const aiApi = axios.create({
       baseURL: `${AI_SERVICE_BASE_URL}/v1`,
       timeout: 60000, // AI 분석은 시간이 오래 걸릴 수 있음
     });
-    const response = await aiApi.post(`/interview/ai-review`, { interview_id: interviewId });
+
+    // 사용자 ID 가져오기 - 현재 로그인된 사용자 또는 guest
+    const token = localStorage.getItem('token');
+    let currentUserId = userId || 'guest';
+
+    if (!currentUserId || currentUserId === 'guest') {
+      if (token) {
+        try {
+          // JWT 토큰에서 사용자 ID 추출 시도
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          currentUserId = payload.userId?.toString() || payload.sub?.toString() || 'guest';
+        } catch (error) {
+          console.warn('토큰 파싱 실패:', error);
+          currentUserId = 'guest';
+        }
+      }
+    }
+
+    const response = await aiApi.post(`/interview/ai-review`, {
+      interview_id: interviewId,
+      user_id: currentUserId
+    });
     return response.data;
   },
   generateCoverLetterSection: async (data: any) => {

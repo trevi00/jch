@@ -42,4 +42,20 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findPostsWithImagesOrderByCreatedAtDesc(Pageable pageable);
 
     Long countByCategoryAndIsDeletedFalse(Category category);
+
+    // AI Statistics queries
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.isDeleted = false AND p.sentimentLabel IS NOT NULL")
+    Long countTotalSentimentAnalyses();
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.isDeleted = false AND p.sentimentLabel = 'positive'")
+    Long countPositivePosts();
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.isDeleted = false AND p.sentimentLabel = 'neutral'")
+    Long countNeutralPosts();
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.isDeleted = false AND p.sentimentLabel = 'negative'")
+    Long countNegativePosts();
+
+    @Query("SELECT COUNT(p) FROM Post p WHERE p.isDeleted = false AND p.imageUrl IS NOT NULL")
+    Long countPostsWithImages();
 }

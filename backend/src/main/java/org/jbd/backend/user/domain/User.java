@@ -118,6 +118,11 @@ public class User extends BaseEntity {
         this.userType = UserType.COMPANY;
     }
 
+    public void convertToAdmin() {
+        this.userType = UserType.ADMIN;
+        this.adminConvertedAt = LocalDateTime.now();
+    }
+
 
     public void updateLastLogin() {
         this.lastLoginAt = LocalDateTime.now();

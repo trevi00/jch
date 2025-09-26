@@ -859,40 +859,32 @@ async def get_interview_history(user_id: str = "guest"):
 
 class AIReviewRequest(BaseModel):
     interview_id: int
+    user_id: str = "guest"  # 사용자 ID 추가
 
 @router.post("/ai-review")
 async def get_ai_review(request: AIReviewRequest):
-    """AI 총평 생성 API"""
+    """AI 총평 생성 API - 사용자별 접근 제한"""
     try:
-        # 모든 사용자의 면접 기록에서 해당 인터뷰 찾기
+        # 해당 사용자의 면접 기록에서만 찾기 (보안 강화)
+        user_records = get_interview_records(request.user_id)
+
         interview_data = None
-        user_id = None
-        
-        # data/interview_records 디렉토리에서 모든 사용자 파일 검사
-        for filename in os.listdir(INTERVIEW_RECORDS_DIR):
-            if filename.startswith("user_") and filename.endswith(".json"):
-                user_file = os.path.join(INTERVIEW_RECORDS_DIR, filename)
-                with open(user_file, 'r', encoding='utf-8') as f:
-                    records = json.load(f)
-                    for record in records:
-                        if record.get('interviewId') == request.interview_id:
-                            interview_data = record
-                            user_id = filename.replace("user_", "").replace(".json", "")
-                            break
-                    if interview_data:
-                        break
-        
+        for record in user_records:
+            if record.get('interviewId') == request.interview_id:
+                interview_data = record
+                break
+
         if not interview_data:
             raise HTTPException(status_code=404, detail="면접 기록을 찾을 수 없습니다")
-        
+
         # AI 총평 생성
         ai_review = await generate_ai_review(interview_data)
-        
+
         return {
             "success": True,
             "data": ai_review
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:

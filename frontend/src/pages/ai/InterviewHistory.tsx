@@ -143,7 +143,7 @@ export default function InterviewHistory() {
 
   const aiReviewMutation = useMutation({
     mutationFn: async (interviewId: number) => {
-      const response = await aiClient.getAIReview(interviewId)
+      const response = await aiClient.getAIReview(interviewId, userId)
       return response
     },
     onSuccess: (data) => {

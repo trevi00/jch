@@ -1,13 +1,13 @@
 -- Initialize admin user for development and testing
 MERGE INTO users (
-    email, 
-    password, 
-    name, 
-    user_type, 
-    email_verified, 
+    email,
+    password,
+    name,
+    user_type,
+    email_verified,
     employment_status,
     admin_converted_at,
-    created_at, 
+    created_at,
     updated_at
 ) VALUES (
     'admin@jbd.com',

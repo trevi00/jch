@@ -115,16 +115,12 @@ public class SecurityConfig {
 
                         // 인증 관련 엔드포인트는 모두 허용
                         // - /auth/** : 회원가입, 로그인, 토큰 갱신 등
-                        // - /admin/login, /admin/verify, /admin/promote : 관리자 로그인 및 권한 부여
+                        // - /admin/** : 관리자 전체 기능 (인증 없이 접근 허용)
                         // - /oauth2/**, /login/oauth2/** : OAuth2 로그인 흐름
                         .requestMatchers(
                                 "/auth/**",
-                                "/admin/login",
-                                "/admin/verify",
-                                "/admin/promote",
-                                "/api/admin/login",
-                                "/api/admin/verify",
-                                "/api/admin/promote",
+                                "/admin/**",
+                                "/api/admin/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**"
                         ).permitAll()
@@ -169,9 +165,7 @@ public class SecurityConfig {
                         // TODO: 프로덕션에서는 제거 필요
                         .requestMatchers(HttpMethod.POST, "/categories/**").permitAll()
 
-                        // 관리자 전용 엔드포인트
-                        // - 관리자 대시보드, 시스템 관리 기능
-                        .requestMatchers("/dashboard/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
+                        // 관리자 엔드포인트는 위에서 permitAll()로 허용됨
 
                         // 기업 사용자 전용 엔드포인트
                         // - 기업 프로필 관리, 채용공고 등록 등

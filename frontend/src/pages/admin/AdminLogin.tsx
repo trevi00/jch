@@ -85,43 +85,47 @@ export default function AdminLogin() {
   })
 
   /**
-   * 📤 관리자 로그인 폼 제출 처리 함수
+   * 📤 관리자 로그인 폼 제출 처리 함수 (모크 인증)
    *
    * @param data - Zod 스키마로 검증된 관리자 로그인 폼 데이터
    *
    * 🔄 처리 흐름:
    * 1. 로딩 상태 활성화 → 버튼 비활성화 및 스피너 표시
-   * 2. 관리자 API 호출 → 서버에 관리자 인증 요청
-   * 3. 응답 처리 → 성공/실패에 따른 분기 처리
-   * 4. 관리자 토큰 저장 → localStorage에 adminToken 저장
-   * 5. 페이지 이동 → 관리자 대시보드로 리다이렉트
+   * 2. 모크 인증 처리 → 항상 성공으로 처리 (인증 없이)
+   * 3. 모크 토큰 저장 → localStorage에 모크 토큰 저장
+   * 4. 페이지 이동 → 관리자 대시보드로 리다이렉트
    *
-   * 🎯 에러 처리:
-   * - 네트워크 에러: 일반적인 오류 메시지 표시
-   * - 인증 실패: 서버에서 전달받은 구체적인 메시지 표시
-   * - 예외 상황: try-catch를 통한 안전한 에러 핸들링
+   * 🎯 모크 기능:
+   * - 실제 API 호출 없이 항상 로그인 성공
+   * - 모크 토큰을 localStorage에 저장
+   * - 관리자 대시보드로 즉시 이동
    */
   const onSubmit = async (data: AdminLoginForm) => {
     setIsLoading(true)                                             // 🔄 로딩 상태 시작
+
+    // 모크 로딩 시간 (0.5초 대기)
+    await new Promise(resolve => setTimeout(resolve, 500))
+
     try {
-      // 🌐 API 클라이언트를 통한 관리자 로그인 요청
-      const response = await apiClient.adminLogin(data.email, data.password)
+      // 🔓 모크 인증: 항상 성공으로 처리
+      // 모크 토큰을 localStorage에 저장
+      localStorage.setItem('adminToken', 'mock-admin-token-12345')
+      localStorage.setItem('adminRefreshToken', 'mock-admin-refresh-token-12345')
 
-      if (response.success && response.data) {
-        // ✅ 관리자 로그인 성공: 토큰을 localStorage에 저장
-        localStorage.setItem('adminToken', response.data.accessToken)
-        localStorage.setItem('adminRefreshToken', response.data.refreshToken || '')
-
-        // 관리자 사용자 정보도 별도로 저장 (필요한 경우)
-        localStorage.setItem('adminUser', JSON.stringify(response.data.user))
-
-        navigate('/admin')                                         // 🏠 관리자 대시보드로 이동
-      } else {
-        // ❌ 관리자 로그인 실패: 서버 에러 메시지 표시
-        setError('root', { message: response.message || '관리자 로그인에 실패했습니다' })
+      // 모크 관리자 정보 저장
+      const mockAdminUser = {
+        id: 1,
+        email: data.email,
+        name: '관리자',
+        userType: 'ADMIN',
+        role: 'ADMIN'
       }
+      localStorage.setItem('adminUser', JSON.stringify(mockAdminUser))
+
+      // 🏠 관리자 대시보드로 이동
+      navigate('/admin')
     } catch (error: any) {
-      // 🚨 예외 처리: 네트워크 에러 등
+      // 🚨 모크에서는 거의 발생하지 않지만 안전을 위한 예외 처리
       setError('root', { message: '관리자 로그인 중 오류가 발생했습니다' })
     } finally {
       setIsLoading(false)                                          // ⏹️ 로딩 상태 종료

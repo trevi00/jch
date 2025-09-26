@@ -265,34 +265,15 @@ class ApiClient {
    * 이벤트: 관리자 로그인 API 호출 이벤트, 관리자 인증 토큰 생성 이벤트
    */
   async adminLogin(username: string, password: string): Promise<ApiResponse<any>> {
-    // 임시로 일반 로그인 엔드포인트를 사용하고 ADMIN 권한 확인
-    const response = await this.api.post<ApiResponse<any>>('/api/auth/login', {
+    const response = await this.api.post<ApiResponse<any>>('/api/admin/login', {
       email: username,
       password: password
     });
 
-    // ADMIN 권한이 있는지 확인
-    if (response.data.success && response.data.data?.user?.userType !== 'ADMIN') {
-      return {
-        success: false,
-        message: '관리자 권한이 필요합니다.',
-        data: null
-      };
-    }
-
-    // 응답 데이터를 AdminLogin이 기대하는 형태로 변환
-    if (response.data.success && response.data.data) {
-      return {
-        success: true,
-        message: response.data.message,
-        data: {
-          user: response.data.data.user,
-          accessToken: response.data.data.access_token,  // access_token → accessToken
-          refreshToken: response.data.data.refresh_token, // refresh_token → refreshToken
-          tokenType: response.data.data.token_type || 'Bearer',
-          expiresIn: response.data.data.expires_in || 86400
-        }
-      };
+    // 성공시 관리자 토큰을 별도로 저장
+    if (response.data.success && response.data.data?.accessToken) {
+      localStorage.setItem('adminToken', response.data.data.accessToken);
+      localStorage.setItem('adminRefreshToken', response.data.data.refreshToken || '');
     }
 
     return response.data;
@@ -340,6 +321,34 @@ class ApiClient {
   async logoutUser(): Promise<ApiResponse> {
     const response = await this.api.post<ApiResponse>('/api/auth/logout');
     this.logout();
+    return response.data;
+  }
+
+  /**
+   * 사용자를 관리자로 승급
+   * @param email 승급할 사용자 이메일
+   * @param secretKey 관리자 시크릿 키
+   * 이벤트: 관리자 승급 API 호출 이벤트, 권한 변경 이벤트
+   */
+  async promoteToAdmin(email: string, secretKey: string): Promise<ApiResponse<void>> {
+    const response = await this.api.post<ApiResponse<void>>('/api/admin/promote', {
+      email: email,
+      secretKey: secretKey
+    });
+    return response.data;
+  }
+
+  /**
+   * 관리자 권한 검증
+   * @param token JWT 토큰 (Bearer 접두사 포함)
+   * 이벤트: 관리자 권한 검증 API 호출 이벤트
+   */
+  async verifyAdminToken(token: string): Promise<ApiResponse<any>> {
+    const response = await this.api.get<ApiResponse<any>>('/api/admin/verify', {
+      headers: {
+        Authorization: token
+      }
+    });
     return response.data;
   }
 
@@ -445,32 +454,12 @@ class ApiClient {
   }
 
   /**
-   * 사용자 계정 잠금 (관리자)
-   * @param userId 잠금할 사용자 ID
-   * 이벤트: 관리자 권한 확인 이벤트, 사용자 계정 잠금 이벤트
+   * 사용자 계정 삭제 (관리자)
+   * @param userId 삭제할 사용자 ID
+   * 이벤트: 관리자 권한 확인 이벤트, 사용자 계정 삭제 이벤트
    */
-  async lockUserAccount(userId: number): Promise<ApiResponse<void>> {
-    const adminToken = localStorage.getItem('adminToken');
-    const response = await this.api.post<ApiResponse<void>>(`/api/users/${userId}/lock-account`, {}, {
-      headers: {
-        'Authorization': `Bearer ${adminToken}`
-      }
-    });
-    return response.data;
-  }
-
-  /**
-   * 사용자 계정 잠금 해제 (관리자)
-   * @param userId 잠금 해제할 사용자 ID
-   * 이벤트: 관리자 권한 확인 이벤트, 사용자 계정 잠금 해제 이벤트
-   */
-  async unlockUserAccount(userId: number): Promise<ApiResponse<void>> {
-    const adminToken = localStorage.getItem('adminToken');
-    const response = await this.api.post<ApiResponse<void>>(`/api/users/${userId}/unlock-account`, {}, {
-      headers: {
-        'Authorization': `Bearer ${adminToken}`
-      }
-    });
+  async deleteUserAccount(userId: number): Promise<ApiResponse<void>> {
+    const response = await this.api.delete<ApiResponse<void>>(`/api/admin/users/${userId}`);
     return response.data;
   }
 
@@ -578,12 +567,12 @@ class ApiClient {
   }
 
   /**
-   * 직무 공고 삭제
+   * 직무 공고 삭제 (관리자)
    * @param id 삭제할 직무 공고 ID
    * 이벤트: 직무 공고 삭제 API 호출 이벤트, 공고 제거 이벤트
    */
   async deleteJobPosting(id: number): Promise<ApiResponse> {
-    const response = await this.api.delete<ApiResponse>(`/api/job-postings/${id}`);
+    const response = await this.api.delete<ApiResponse>(`/api/admin/job-postings/${id}`);
     return response.data;
   }
 
@@ -792,22 +781,12 @@ class ApiClient {
   // ============= Certificate APIs =============
 
   async getAllCertificateRequests(): Promise<ApiResponse<any>> {
-    const adminToken = localStorage.getItem('adminToken');
-    const response = await this.api.get<ApiResponse<any>>('/api/certificates/admin/all', {
-      headers: {
-        'Authorization': `Bearer ${adminToken}`
-      }
-    });
+    const response = await this.api.get<ApiResponse<any>>('/api/admin/certificates');
     return response.data;
   }
 
   async processCertificateRequest(requestId: number, data: { approved: boolean; adminNotes?: string }): Promise<ApiResponse<any>> {
-    const adminToken = localStorage.getItem('adminToken');
-    const response = await this.api.put<ApiResponse<any>>(`/api/certificates/admin/${requestId}/process`, data, {
-      headers: {
-        'Authorization': `Bearer ${adminToken}`
-      }
-    });
+    const response = await this.api.put<ApiResponse<any>>(`/api/admin/certificates/${requestId}/process`, data);
     return response.data;
   }
 
@@ -915,7 +894,7 @@ class ApiClient {
   }
 
   async deletePost(id: number): Promise<ApiResponse<void>> {
-    const response = await this.api.delete<ApiResponse<void>>(`/api/posts/${id}`);
+    const response = await this.api.delete<ApiResponse<void>>(`/api/admin/posts/${id}`);
     return response.data;
   }
 
@@ -1085,7 +1064,7 @@ class ApiClient {
       throw new Error('No admin token found in localStorage');
     }
 
-    const response = await this.api.get<ApiResponse<any>>('/api/dashboard/admin', {
+    const response = await this.api.get<ApiResponse<any>>('/api/admin/dashboard', {
       headers: {
         Authorization: `Bearer ${adminToken}`
       }

@@ -50,7 +50,7 @@ public class JobPostingResponseDto {
 
 
     public static JobPostingResponseDto from(JobPosting jobPosting) {
-        // CompanyUser 정보를 안전하게 가져오기
+        // CompanyUser 정보를 안전하게 가져오기.
         Long companyUserId = null;
         String companyUserName = null;
 

@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.Valid;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Slf4j
@@ -25,6 +30,7 @@ import java.util.List;
 public class SupportController {
 
     private final SupportService supportService;
+    private final String UPLOAD_DIR = "uploads/";
 
     @PostMapping("/tickets")
     @PreAuthorize("isAuthenticated()")
@@ -170,14 +176,25 @@ public class SupportController {
     @PostMapping("/upload")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<SupportDto.FileUploadResponse>> uploadFile(
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file) throws IOException {
 
-        // 파일 업로드 로직 구현 필요
-        // 임시로 모의 응답 반환
+        // 업로드 폴더가 없으면 생성
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+
+        // 업로드할 파일의 경로
+        Path filePath = Paths.get(UPLOAD_DIR, file.getOriginalFilename());
+
+        // 파일 저장
+        file.transferTo(filePath);
+
+        // 응답 객체 생성
         SupportDto.FileUploadResponse response = SupportDto.FileUploadResponse.builder()
-                .fileUrl("/uploads/" + file.getOriginalFilename())
-                .fileName(file.getOriginalFilename())
-                .fileSize(file.getSize())
+                .fileUrl("/uploads/" + file.getOriginalFilename()) // 파일 접근 경로
+                .fileName(file.getOriginalFilename())  // 파일 이름
+                .fileSize(file.getSize())  // 파일 크기
                 .build();
 
         return ResponseEntity.ok(ApiResponse.success("파일이 업로드되었습니다", response));

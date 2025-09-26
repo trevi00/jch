@@ -408,7 +408,6 @@ export default function Interview() {
                 </>
               ) : (
                 <>
-                  <Play className="w-5 h-5 mr-2" />
                   면접 시작하기
                 </>
               )}

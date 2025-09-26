@@ -18,7 +18,25 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByCategoryAndIsDeletedFalseOrderByCreatedAtDesc(Category category, Pageable pageable);
 
-    List<Post> findByTitleContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(String title, Pageable pageable);
+    Page<Post> findByTitleContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(String title, Pageable pageable);
+
+    Page<Post> findByContentContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(String content, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.isDeleted = false AND " +
+           "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY " +
+           "CASE WHEN LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 2 END, " +
+           "p.createdAt DESC")
+    Page<Post> searchByTitleOrContent(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT p FROM Post p WHERE p.isDeleted = false AND p.category.id = :categoryId AND " +
+           "(LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY " +
+           "CASE WHEN LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) THEN 1 ELSE 2 END, " +
+           "p.createdAt DESC")
+    Page<Post> searchByCategoryAndKeyword(@Param("categoryId") Long categoryId, @Param("keyword") String keyword, Pageable pageable);
 
     List<Post> findByAuthorAndIsDeletedFalseOrderByCreatedAtDesc(User author, Pageable pageable);
 

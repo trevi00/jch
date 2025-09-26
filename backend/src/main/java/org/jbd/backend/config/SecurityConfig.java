@@ -173,6 +173,11 @@ public class SecurityConfig {
                         // - 관리자 대시보드, 시스템 관리 기능
                         .requestMatchers("/dashboard/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
 
+                        // 증명서 관련 엔드포인트
+                        // - 증명서 요청, 내 요청 목록 조회 (인증된 사용자)
+                        // - 관리자용 증명서 관리는 별도 /api/admin/** 경로 사용
+                        .requestMatchers("/certificates/**").authenticated()
+
                         // 기업 사용자 전용 엔드포인트
                         // - 기업 프로필 관리, 채용공고 등록 등
                         // - 관리자도 접근 가능

@@ -131,10 +131,13 @@ public class PostController {
     }
 
     /**
-     * 제목으로 게시글을 검색합니다.
-     * 게시글 제목에서 지정된 키워드를 포함하는 게시글들을 검색합니다.
+     * 키워드로 게시글을 검색합니다.
+     * 게시글 제목과 내용에서 지정된 키워드를 포함하는 게시글들을 검색합니다.
+     * 제목에서 매칭되는 게시글이 우선적으로 정렬됩니다.
      *
-     * @param keyword 검색할 키워드 (필수)
+     * 수동 검색 방식: 사용자가 완전히 입력한 후 검색 버튼 또는 엔터키로 실행
+     *
+     * @param keyword 검색할 키워드 (필수, 공백 제거 후 처리)
      * @param page 페이지 번호 (기본값: 0)
      * @param size 페이지 크기 (기본값: 10)
      * @return ResponseEntity<ApiResponse<PostDto.PageResponse>> 검색된 게시글 목록
@@ -142,14 +145,60 @@ public class PostController {
      * @see PostDto.PageResponse
      */
     @GetMapping("/search")
+    public ResponseEntity<ApiResponse<PostDto.PageResponse>> searchPosts(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PostDto.PageResponse posts = postService.searchPosts(keyword, pageable);
+        return ResponseEntity.ok(ApiResponse.success("게시글 검색 성공", posts));
+    }
+
+    /**
+     * 제목으로만 게시글을 검색합니다.
+     * 게시글 제목에서만 지정된 키워드를 포함하는 게시글들을 검색합니다.
+     *
+     * @param keyword 검색할 키워드 (필수)
+     * @param page 페이지 번호 (기본값: 0)
+     * @param size 페이지 크기 (기본값: 10)
+     * @return ResponseEntity<ApiResponse<PostDto.PageResponse>> 검색된 게시글 목록
+     * @apiNote GET /posts/search/title
+     * @see PostDto.PageResponse
+     */
+    @GetMapping("/search/title")
     public ResponseEntity<ApiResponse<PostDto.PageResponse>> searchPostsByTitle(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
         Pageable pageable = PageRequest.of(page, size);
         PostDto.PageResponse posts = postService.searchPostsByTitle(keyword, pageable);
-        return ResponseEntity.ok(ApiResponse.success("게시글 검색 성공", posts));
+        return ResponseEntity.ok(ApiResponse.success("제목 검색 성공", posts));
+    }
+
+    /**
+     * 특정 카테고리 내에서 키워드로 게시글을 검색합니다.
+     * 지정된 카테고리의 게시글 중에서 제목이나 내용에 키워드가 포함된 게시글을 검색합니다.
+     *
+     * @param categoryId 카테고리 ID
+     * @param keyword 검색할 키워드 (필수)
+     * @param page 페이지 번호 (기본값: 0)
+     * @param size 페이지 크기 (기본값: 10)
+     * @return ResponseEntity<ApiResponse<PostDto.PageResponse>> 카테고리 내 검색된 게시글 목록
+     * @apiNote GET /posts/category/{categoryId}/search
+     * @see PostDto.PageResponse
+     */
+    @GetMapping("/category/{categoryId}/search")
+    public ResponseEntity<ApiResponse<PostDto.PageResponse>> searchPostsByCategory(
+            @PathVariable Long categoryId,
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        PostDto.PageResponse posts = postService.searchPostsByCategory(categoryId, keyword, pageable);
+        return ResponseEntity.ok(ApiResponse.success("카테고리 내 검색 성공", posts));
     }
 
     /**

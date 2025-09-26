@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/certificates")
+@RequestMapping("/certificates")
 @RequiredArgsConstructor
 public class CertificateRequestController {
 
@@ -35,9 +35,13 @@ public class CertificateRequestController {
             CertificateRequestDto.ResponseDto response = certificateRequestService.requestCertificate(userId, dto);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success("증명서 요청이 등록되었습니다", response));
-        } catch (Exception e) {
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
             return ResponseEntity.status(401)
                     .body(ApiResponse.error("인증에 실패했습니다: " + e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace(); // 로그에 스택 트레이스 출력
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("서버 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 
@@ -48,9 +52,13 @@ public class CertificateRequestController {
             Long userId = jwtService.extractUserId(token.substring(7));
             List<CertificateRequestDto.ResponseDto> requests = certificateRequestService.getUserRequests(userId);
             return ResponseEntity.ok(ApiResponse.success("내 증명서 요청 목록 조회 성공", requests));
-        } catch (Exception e) {
+        } catch (io.jsonwebtoken.JwtException | IllegalArgumentException e) {
             return ResponseEntity.status(401)
                     .body(ApiResponse.error("인증에 실패했습니다: " + e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace(); // 로그에 스택 트레이스 출력
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error("서버 오류가 발생했습니다: " + e.getMessage()));
         }
     }
 

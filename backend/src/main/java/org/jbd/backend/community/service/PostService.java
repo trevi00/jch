@@ -16,6 +16,10 @@ public interface PostService {
     PostDto.PageResponse getPostsByCategory(Long categoryId, Pageable pageable);
     
     PostDto.PageResponse searchPostsByTitle(String keyword, Pageable pageable);
+
+    PostDto.PageResponse searchPosts(String keyword, Pageable pageable);
+
+    PostDto.PageResponse searchPostsByCategory(Long categoryId, String keyword, Pageable pageable);
     
     PostDto.PageResponse getPostsByAuthor(String authorEmail, Pageable pageable);
     

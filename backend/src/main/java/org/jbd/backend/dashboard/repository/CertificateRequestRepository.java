@@ -72,7 +72,7 @@ public interface CertificateRequestRepository extends JpaRepository<CertificateR
     /**
      * 관리자용: 최근 미처리 요청 목록
      */
-    @Query("SELECT cr FROM CertificateRequest cr WHERE cr.status = 'PENDING' ORDER BY cr.createdAt ASC")
+    @Query("SELECT cr FROM CertificateRequest cr WHERE cr.status = org.jbd.backend.dashboard.domain.enums.RequestStatus.PENDING ORDER BY cr.createdAt ASC")
     List<CertificateRequest> findRecentPendingRequests(Pageable pageable);
     
     /**

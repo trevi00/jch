@@ -844,7 +844,7 @@ class ApiClient {
     let search: string | undefined;
     let pageNum: number;
     let pageSize: number;
-    
+
     if (typeof options === 'object' && options !== null) {
       categoryId = options.categoryId;
       search = options.search;
@@ -855,19 +855,29 @@ class ApiClient {
       pageNum = page;
       pageSize = size;
     }
-    
+
     const params = new URLSearchParams();
     params.append('page', pageNum.toString());
     params.append('size', pageSize.toString());
-    
-    if (search) {
-      params.append('search', search);
-    }
-    
+
     let url = '/api/posts';
-    if (categoryId) {
+
+    // 우선순위: 검색 > 카테고리별 조회 > 전체 조회
+    if (search && search.trim()) {
+      // 검색이 있는 경우
+      params.append('keyword', search.trim());
+      if (categoryId) {
+        // 카테고리 내 검색
+        url = `/api/posts/category/${categoryId}/search?${params.toString()}`;
+      } else {
+        // 전체 검색
+        url = `/api/posts/search?${params.toString()}`;
+      }
+    } else if (categoryId) {
+      // 검색 없이 카테고리만
       url = `/api/posts/category/${categoryId}?${params.toString()}`;
     } else {
+      // 전체 게시글 조회
       url = `/api/posts?${params.toString()}`;
     }
 

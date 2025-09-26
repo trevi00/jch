@@ -7,9 +7,23 @@ import { useAuthStore } from '@/hooks/useAuthStore'
 
 export default function Community() {
   const { user } = useAuthStore()
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('') // 입력 필드용
+  const [searchTerm, setSearchTerm] = useState('') // 실제 검색용
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [page, setPage] = useState(0)
+
+  // 검색 실행 함수
+  const handleSearch = () => {
+    setSearchTerm(searchInput.trim())
+    setPage(0) // 검색시 첫 페이지로 이동
+  }
+
+  // 엔터키 검색
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
 
   const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
@@ -127,17 +141,26 @@ export default function Community() {
       {/* 검색 및 필터 */}
       <div className="space-y-4">
         {/* 검색 바 */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-            <Search className="h-5 w-5 text-gray-400" />
+        <div className="relative flex">
+          <div className="relative flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="input pl-10 pr-4"
+              placeholder="제목, 내용으로 검색 (엔터키 또는 검색 버튼)"
+            />
           </div>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input pl-10"
-            placeholder="제목, 내용으로 검색"
-          />
+          <button
+            onClick={handleSearch}
+            className="ml-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            <Search className="h-4 w-4" />
+          </button>
         </div>
 
         {/* 카테고리 탭 */}

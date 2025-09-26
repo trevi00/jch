@@ -114,8 +114,34 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public PostDto.PageResponse searchPostsByTitle(String keyword, Pageable pageable) {
-        List<Post> posts = postRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(keyword, pageable);
-        return convertToPageResponse(posts, pageable);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllPosts(pageable);
+        }
+
+        var posts = postRepository.findByTitleContainingIgnoreCaseAndIsDeletedFalseOrderByCreatedAtDesc(keyword.trim(), pageable);
+        return new PostDto.PageResponse(posts);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PostDto.PageResponse searchPosts(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllPosts(pageable);
+        }
+
+        var posts = postRepository.searchByTitleOrContent(keyword.trim(), pageable);
+        return new PostDto.PageResponse(posts);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PostDto.PageResponse searchPostsByCategory(Long categoryId, String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getPostsByCategory(categoryId, pageable);
+        }
+
+        var posts = postRepository.searchByCategoryAndKeyword(categoryId, keyword.trim(), pageable);
+        return new PostDto.PageResponse(posts);
     }
 
     @Override

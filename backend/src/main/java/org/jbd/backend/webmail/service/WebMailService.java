@@ -155,10 +155,10 @@ public class WebMailService {
                 // 발송 성공
                 LocalDateTime sentAt = LocalDateTime.now();
                 
-                // 이메일 이력 저장 (검증된 발신자 정보 사용)
+                // 이메일 이력 저장 (실제 발신자 정보 사용)
                 EmailHistory emailHistory = EmailHistory.builder()
-                    .senderEmail(defaultSenderEmail)
-                    .senderName(defaultSenderName)
+                    .senderEmail(request.getSenderEmail()) // 실제 로그인한 사용자 이메일
+                    .senderName(request.getSenderName())   // 실제 로그인한 사용자 이름
                     .recipientEmail(request.getTo())
                     .subject(request.getSubject())
                     .content(contentToSend)

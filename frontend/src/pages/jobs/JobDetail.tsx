@@ -315,37 +315,39 @@ const userApplication = applicationData?.data?.content?.find(
 
         {/* 사이드바 */}
         <div className="space-y-6">
-          {/* 지원 버튼 */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-            <div className="p-6">
-              {userApplication ? (
-                <div className="text-center">
-                  <div className="mb-4">
-                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
-                      {getApplicationStatusLabel(userApplication.status)}
-                    </span>
+          {/* 지원 버튼 - 기업 유저는 지원할 수 없음 */}
+          {user?.userType !== 'COMPANY' && (
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="p-6">
+                {userApplication ? (
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                        {getApplicationStatusLabel(userApplication.status)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      지원일: {new Date(userApplication.appliedAt).toLocaleDateString()}
+                    </p>
+                    <Link
+                      to="/applications"
+                      className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      지원 현황 보기
+                    </Link>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    지원일: {new Date(userApplication.appliedAt).toLocaleDateString()}
-                  </p>
-                  <Link
-                    to="/applications"
-                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors"
+                ) : (
+                  <button
+                    onClick={() => setShowApplicationModal(true)}
+                    className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+                    disabled={job.deadlineDate ? (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) : false}
                   >
-                    지원 현황 보기
-                  </Link>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowApplicationModal(true)}
-                  className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
-                  disabled={job.deadlineDate ? (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) : false}
-                >
-                  {job.deadlineDate && (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) ? '마감된 공고' : '지원하기'}
-                </button>
-              )}
+                    {job.deadlineDate && (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) ? '마감된 공고' : '지원하기'}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 필요 기술 */}
           {job.requiredSkills && job.requiredSkills.length > 0 && (

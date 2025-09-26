@@ -1520,10 +1520,14 @@ const CompanyDashboardComponent = () => {
         <CardContent>
           <div className="space-y-4">
             {dashboard?.myJobPostings?.map((job: any) => (
-              <div key={job.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <Link
+                key={job.id}
+                to={`/jobs/${job.id}`}
+                className="block border rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-gray-900 mb-2">{job.title}</h3>
+                    <h3 className="font-semibold text-lg text-gray-900 mb-2 hover:text-blue-600 transition-colors">{job.title}</h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">위치:</span>
@@ -1554,7 +1558,7 @@ const CompanyDashboardComponent = () => {
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
             {(!dashboard?.myJobPostings || dashboard.myJobPostings.length === 0) && (
               <div className="text-center py-12 text-gray-500">

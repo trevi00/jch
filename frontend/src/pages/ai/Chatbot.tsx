@@ -291,7 +291,7 @@ export default function Chatbot() {
 
         <CardContent className="flex-1 flex flex-col overflow-hidden">
           {/* 제안 섹션 */}
-          {showSuggestions && messages.length <= 1 && (
+          {showSuggestions && (
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
               <h3 className="font-medium mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-yellow-500" />

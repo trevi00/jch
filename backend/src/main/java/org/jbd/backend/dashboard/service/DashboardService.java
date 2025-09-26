@@ -20,6 +20,9 @@ import org.jbd.backend.user.domain.*;
 import org.jbd.backend.user.domain.enums.*;
 import org.jbd.backend.user.repository.*;
 import org.jbd.backend.user.service.UserService;
+import org.jbd.backend.community.repository.PostRepository;
+import org.jbd.backend.ai.repository.InterviewRepository;
+import org.jbd.backend.ai.domain.InterviewStatus;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +51,8 @@ public class DashboardService {
     private final EducationRepository educationRepository;
     private final CareerHistoryRepository careerHistoryRepository;
     private final UserProfileRepository userProfileRepository;
+    private final PostRepository postRepository;
+    private final InterviewRepository interviewRepository;
 
     public GeneralUserDashboardDto getGeneralUserDashboard(Long userId) {
         User user = userService.findUserById(userId);
@@ -88,6 +93,7 @@ public class DashboardService {
                 .applicationStatistics(getApplicationStatisticsForAdmin())
                 .certificateRequests(getRecentCertificateRequests())
                 .systemStatistics(getSystemStatistics())
+                .aiServiceStatistics(getAiServiceStatistics())
                 .build();
     }
 
@@ -1111,5 +1117,60 @@ public class DashboardService {
             case ADVANCED -> 80;
             case EXPERT -> 100;
         };
+    }
+
+    /**
+     * AI 서비스 통계를 조회합니다.
+     * 필요한 AI 서비스(면접, 이미지 생성, 감정분석)만 실제 데이터로 제공합니다.
+     */
+    private AdminDashboardDto.AiServiceStatisticsDto getAiServiceStatistics() {
+        try {
+            // 실제 AI 면접 통계 (Interview 테이블에서 조회)
+            Long totalInterviews = interviewRepository.countTotalInterviews();
+            Long completedInterviews = interviewRepository.countInterviewsByStatus(InterviewStatus.COMPLETED);
+            Double averageScore = interviewRepository.findAverageScoreByStatus(InterviewStatus.COMPLETED);
+
+            // 실제 감정분석 통계 (Posts 테이블에서 조회)
+            Long totalSentimentAnalyses = postRepository.countTotalSentimentAnalyses();
+            Long positivePosts = postRepository.countPositivePosts();
+            Long negativePosts = postRepository.countNegativePosts();
+
+            // 긍정도율 계산
+            double positivityRate = totalSentimentAnalyses > 0 ?
+                (positivePosts.doubleValue() / totalSentimentAnalyses.doubleValue()) * 100.0 : 0.0;
+
+            // 실제 이미지 생성 통계 (Posts 테이블에서 조회)
+            Long totalImageGenerations = postRepository.countPostsWithImages();
+
+            return AdminDashboardDto.AiServiceStatisticsDto.builder()
+                    // AI 면접 통계 (실제 데이터)
+                    .totalInterviews(totalInterviews)
+                    .completedInterviews(completedInterviews)
+                    .averageInterviewScore(averageScore != null ? Math.round(averageScore * 10.0) / 10.0 : 0.0)
+
+                    // 이미지 생성 통계 (실제 데이터)
+                    .totalImageGenerations(totalImageGenerations)
+
+                    // 감정분석 통계 (실제 데이터)
+                    .totalSentimentAnalyses(totalSentimentAnalyses)
+                    .positivePosts(positivePosts)
+                    .negativePosts(negativePosts)
+                    .positivityRate(Math.round(positivityRate * 10.0) / 10.0) // 소수점 1자리
+                    .build();
+
+        } catch (Exception e) {
+            logger.error("AI 서비스 통계 조회 중 오류 발생", e);
+            // 오류 발생 시 기본값 반환
+            return AdminDashboardDto.AiServiceStatisticsDto.builder()
+                    .totalInterviews(0L)
+                    .completedInterviews(0L)
+                    .averageInterviewScore(0.0)
+                    .totalImageGenerations(0L)
+                    .totalSentimentAnalyses(0L)
+                    .positivePosts(0L)
+                    .negativePosts(0L)
+                    .positivityRate(0.0)
+                    .build();
+        }
     }
 }

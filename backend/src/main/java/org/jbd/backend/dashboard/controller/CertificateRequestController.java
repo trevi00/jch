@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/certificate-requests")
+@RequestMapping("/api/certificates")
 @RequiredArgsConstructor
 public class CertificateRequestController {
 
@@ -59,11 +59,11 @@ public class CertificateRequestController {
             @RequestHeader("Authorization") String token,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         try {
-            String tokenValue = token.substring(7);
-            String userTypeStr = jwtService.extractUserType(tokenValue);
-            Boolean isAdmin = jwtService.extractClaim(tokenValue, claims -> claims.get("isAdmin", Boolean.class));
+            // 어드민 권한 검증 (AdminController와 동일한 방식)
+            String jwt = token.replace("Bearer ", "");
+            String userTypeStr = jwtService.extractUserType(jwt);
 
-            if (!"ADMIN".equals(userTypeStr) || !Boolean.TRUE.equals(isAdmin)) {
+            if (!"ADMIN".equals(userTypeStr)) {
                 return ResponseEntity.status(403)
                         .body(ApiResponse.error("관리자만 접근할 수 있습니다"));
             }
@@ -82,11 +82,11 @@ public class CertificateRequestController {
             @PathVariable Long requestId,
             @Valid @RequestBody CertificateRequestDto.ProcessDto dto) {
         try {
-            String tokenValue = token.substring(7);
-            String userTypeStr = jwtService.extractUserType(tokenValue);
-            Boolean isAdmin = jwtService.extractClaim(tokenValue, claims -> claims.get("isAdmin", Boolean.class));
+            // 어드민 권한 검증 (AdminController와 동일한 방식)
+            String jwt = token.replace("Bearer ", "");
+            String userTypeStr = jwtService.extractUserType(jwt);
 
-            if (!"ADMIN".equals(userTypeStr) || !Boolean.TRUE.equals(isAdmin)) {
+            if (!"ADMIN".equals(userTypeStr)) {
                 return ResponseEntity.status(403)
                         .body(ApiResponse.error("관리자만 접근할 수 있습니다"));
             }
@@ -105,11 +105,11 @@ public class CertificateRequestController {
             @RequestHeader("Authorization") String token,
             @PathVariable Long requestId) {
         try {
-            String tokenValue = token.substring(7);
-            String userTypeStr = jwtService.extractUserType(tokenValue);
-            Boolean isAdmin = jwtService.extractClaim(tokenValue, claims -> claims.get("isAdmin", Boolean.class));
+            // 어드민 권한 검증 (AdminController와 동일한 방식)
+            String jwt = token.replace("Bearer ", "");
+            String userTypeStr = jwtService.extractUserType(jwt);
 
-            if (!"ADMIN".equals(userTypeStr) || !Boolean.TRUE.equals(isAdmin)) {
+            if (!"ADMIN".equals(userTypeStr)) {
                 return ResponseEntity.status(403)
                         .body(ApiResponse.error("관리자만 접근할 수 있습니다"));
             }

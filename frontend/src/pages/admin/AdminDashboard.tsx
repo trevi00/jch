@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import { 
   Users, 
   FileText, 
@@ -14,8 +13,8 @@ import {
   Languages,
   Brain
 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { apiClient } from '@/services/api'
-import { useAuthStore } from '@/hooks/useAuthStore'
 
 interface AdminDashboardData {
   userStatistics: {
@@ -54,53 +53,64 @@ interface AdminDashboardData {
 }
 
 export default function AdminDashboard() {
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const checkAdminAuth = () => {
-      const adminToken = localStorage.getItem('adminToken')
-      const isAdminStatus = localStorage.getItem('isAdmin')
+    const fetchDashboardData = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
 
-      if (adminToken && isAdminStatus === 'true') {
-        setIsAdmin(true)
-      } else {
-        window.location.href = '/adminlogin'
+        // Get admin token from localStorage
+        const adminToken = localStorage.getItem('adminToken')
+        if (!adminToken) {
+          setError('관리자 토큰이 없습니다')
+          return
+        }
+
+        // Fetch admin dashboard data
+        const response = await apiClient.getAdminDashboard()
+
+        if (response.success && response.data) {
+          setDashboardData(response.data as AdminDashboardData)
+        } else {
+          setError(response.message || '대시보드 데이터를 불러올 수 없습니다')
+        }
+      } catch (error: any) {
+        console.error('Dashboard fetch error:', error)
+        setError('대시보드 데이터를 불러오는 중 오류가 발생했습니다')
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    checkAdminAuth()
+    fetchDashboardData()
   }, [])
 
-  const { data: dashboardData, isLoading } = useQuery({
-    queryKey: ['admin-dashboard'],
-    queryFn: async () => {
-      // Set admin token in headers before making the request
-      const adminToken = localStorage.getItem('adminToken')
-      if (adminToken) {
-        apiClient.setAuthToken(adminToken)
-      }
-      const response = await apiClient.getAdminDashboard()
-      return response.data as AdminDashboardData
-    },
-    enabled: isAdmin
-  })
-
-  if (!isAdmin) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">접근 권한이 없습니다</h2>
-          <p className="text-gray-600">관리자만 접근할 수 있는 페이지입니다.</p>
-        </div>
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
       </div>
     )
   }
 
-  if (isLoading) {
+  if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">데이터 로드 오류</h2>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+          >
+            새로고침
+          </button>
+        </div>
       </div>
     )
   }
@@ -139,37 +149,19 @@ export default function AdminDashboard() {
   const aiStats = [
     {
       title: 'AI 면접',
-      value: dashboardData?.aiServiceStatistics.totalInterviews || 0,
+      value: dashboardData?.aiServiceStatistics?.totalInterviews || 0,
       icon: Brain,
       color: 'bg-indigo-500'
     },
     {
-      title: '자소서 생성',
-      value: dashboardData?.aiServiceStatistics.totalCoverLetters || 0,
-      icon: FileText,
-      color: 'bg-pink-500'
-    },
-    {
-      title: '번역 서비스',
-      value: dashboardData?.aiServiceStatistics.totalTranslations || 0,
-      icon: Languages,
-      color: 'bg-cyan-500'
-    },
-    {
       title: '이미지 생성',
-      value: dashboardData?.aiServiceStatistics.totalImageGenerations || 0,
+      value: dashboardData?.aiServiceStatistics?.totalImageGenerations || 0,
       icon: Image,
       color: 'bg-yellow-500'
     },
     {
-      title: '챗봇 대화',
-      value: dashboardData?.aiServiceStatistics.totalChatInteractions || 0,
-      icon: Bot,
-      color: 'bg-emerald-500'
-    },
-    {
       title: '감정 분석',
-      value: dashboardData?.aiServiceStatistics.totalSentimentAnalyses || 0,
+      value: dashboardData?.aiServiceStatistics?.totalSentimentAnalyses || 0,
       icon: TrendingUp,
       color: 'bg-red-500'
     }
@@ -212,7 +204,7 @@ export default function AdminDashboard() {
             <Bot className="w-5 h-5 mr-2" />
             AI 서비스 이용 현황
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4">
             {aiStats.map((stat) => {
               const IconComponent = stat.icon
               return (
@@ -237,9 +229,9 @@ export default function AdminDashboard() {
               <FileText className="w-5 h-5 mr-2" />
               최근 증명서 요청
             </h2>
-            <a href="/admin/certificates" className="text-blue-600 hover:text-blue-800 text-sm">
+            <Link to="/admin/certificates" className="text-blue-600 hover:text-blue-800 text-sm">
               전체 보기
-            </a>
+            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full">
@@ -252,8 +244,8 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {dashboardData?.certificateRequests.slice(0, 5).map((request) => (
-                  <tr key={request.id} className="border-b border-gray-100">
+                {dashboardData?.certificateRequests.slice(0, 5).map((request, index) => (
+                  <tr key={request.id || `cert-req-${index}`} className="border-b border-gray-100">
                     <td className="py-2 px-3">
                       <div>
                         <p className="text-sm font-medium text-gray-900">{request.userName}</p>
@@ -301,34 +293,34 @@ export default function AdminDashboard() {
         <div className="card-content">
           <h2 className="text-lg font-semibold mb-4">빠른 실행</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a
-              href="/admin/users"
+            <Link
+              to="/admin/users"
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center"
             >
               <Users className="w-8 h-8 mx-auto mb-2 text-blue-600" />
               <p className="text-sm font-medium">회원 관리</p>
-            </a>
-            <a
-              href="/admin/certificates"
+            </Link>
+            <Link
+              to="/admin/certificates"
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center"
             >
               <FileText className="w-8 h-8 mx-auto mb-2 text-green-600" />
               <p className="text-sm font-medium">증명서 관리</p>
-            </a>
-            <a
-              href="/admin/jobs"
+            </Link>
+            <Link
+              to="/admin/jobs"
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center"
             >
               <Briefcase className="w-8 h-8 mx-auto mb-2 text-purple-600" />
               <p className="text-sm font-medium">채용공고 관리</p>
-            </a>
-            <a
-              href="/admin/community"
+            </Link>
+            <Link
+              to="/admin/community"
               className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors text-center"
             >
               <MessageSquare className="w-8 h-8 mx-auto mb-2 text-orange-600" />
               <p className="text-sm font-medium">커뮤니티 관리</p>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

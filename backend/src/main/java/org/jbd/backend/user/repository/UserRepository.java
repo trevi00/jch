@@ -62,9 +62,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * 성능 최적화: 사용자 통계를 한 번의 쿼리로 조회
      */
     @Query("SELECT " +
-           "COUNT(CASE WHEN u.userType = 'GENERAL' THEN 1 END) as generalCount, " +
-           "COUNT(CASE WHEN u.userType = 'COMPANY' THEN 1 END) as companyCount, " +
-           "COUNT(CASE WHEN u.userType = 'ADMIN' THEN 1 END) as adminCount, " +
+           "COUNT(CASE WHEN u.userType = org.jbd.backend.user.domain.enums.UserType.GENERAL THEN 1 END) as generalCount, " +
+           "COUNT(CASE WHEN u.userType = org.jbd.backend.user.domain.enums.UserType.COMPANY THEN 1 END) as companyCount, " +
+           "COUNT(CASE WHEN u.userType = org.jbd.backend.user.domain.enums.UserType.ADMIN THEN 1 END) as adminCount, " +
            "COUNT(*) as totalCount " +
            "FROM User u WHERE u.isDeleted = false AND u.isActive = true")
     Object[] findUserStatistics();
@@ -76,8 +76,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "COUNT(CASE WHEN u.createdAt >= :today THEN 1 END) as todayCount, " +
            "COUNT(CASE WHEN u.createdAt >= :weekAgo THEN 1 END) as weekCount, " +
            "COUNT(CASE WHEN u.createdAt >= :monthAgo THEN 1 END) as monthCount, " +
-           "COUNT(CASE WHEN u.createdAt >= :today AND u.userType = 'GENERAL' THEN 1 END) as todayGeneralCount, " +
-           "COUNT(CASE WHEN u.createdAt >= :today AND u.userType = 'COMPANY' THEN 1 END) as todayCompanyCount " +
+           "COUNT(CASE WHEN u.createdAt >= :today AND u.userType = org.jbd.backend.user.domain.enums.UserType.GENERAL THEN 1 END) as todayGeneralCount, " +
+           "COUNT(CASE WHEN u.createdAt >= :today AND u.userType = org.jbd.backend.user.domain.enums.UserType.COMPANY THEN 1 END) as todayCompanyCount " +
            "FROM User u WHERE u.isDeleted = false AND u.isActive = true")
     Object[] findNewUserStatistics(@Param("today") LocalDateTime today,
                                   @Param("weekAgo") LocalDateTime weekAgo,
@@ -86,15 +86,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * 일반 사용자들의 조회
      */
-    @Query("SELECT u FROM User u WHERE u.userType = 'GENERAL' AND u.isDeleted = false AND u.isActive = true")
+    @Query("SELECT u FROM User u WHERE u.userType = org.jbd.backend.user.domain.enums.UserType.GENERAL AND u.isDeleted = false AND u.isActive = true")
     List<User> findAllGeneralUsers();
 
     /**
      * OAuth 제공자별 통계
      */
     @Query("SELECT " +
-           "COUNT(CASE WHEN u.oauthProvider = 'NATIVE' THEN 1 END) as nativeCount, " +
-           "COUNT(CASE WHEN u.oauthProvider = 'GOOGLE' THEN 1 END) as googleCount " +
+           "COUNT(CASE WHEN u.oauthProvider = org.jbd.backend.user.domain.enums.OAuthProvider.NATIVE THEN 1 END) as nativeCount, " +
+           "COUNT(CASE WHEN u.oauthProvider = org.jbd.backend.user.domain.enums.OAuthProvider.GOOGLE THEN 1 END) as googleCount " +
            "FROM User u WHERE u.isDeleted = false AND u.isActive = true")
     Object[] findOAuthProviderStatistics();
 }

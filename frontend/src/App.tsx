@@ -24,8 +24,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 
 // 레이아웃 컴포넌트들 - 페이지 구조 및 권한 관리
 import Layout from '@/components/Layout'           // 일반 사용자용 공통 레이아웃
-// import AdminLayout from '@/components/AdminLayout' // 관리자용 전용 레이아웃 (임시 주석처리 - 파일 누락)
-// import AdminRouteGuard from '@/components/AdminRouteGuard' // 관리자 권한 검증 컴포넌트 (임시 주석처리 - 파일 누락)
+import AdminLayout from '@/components/AdminLayout' // 관리자용 전용 레이아웃
+import AdminRouteGuard from '@/components/AdminRouteGuard' // 관리자 권한 검증 컴포넌트
 
 // 페이지 컴포넌트들 - 각 라우트에 매핑되는 실제 페이지들
 // 🏠 공개 페이지 (인증 불필요)
@@ -76,13 +76,13 @@ import MyApplications from '@/pages/applications/MyApplications'
 import ApplicantManagement from '@/pages/company/ApplicantManagement'
 import ApplicationsRouter from '@/pages/applications/ApplicationsRouter'
 
-// 👑 관리자 전용 페이지 - 임시 주석처리 (파일들이 누락됨)
-// import AdminDashboard from '@/pages/admin/AdminDashboard'
-// import UserManagement from '@/pages/admin/UserManagement'
-// import JobManagement from '@/pages/admin/JobManagement'
-// import CommunityManagement from '@/pages/admin/CommunityManagement'
-// import CertificateManagement from '@/pages/admin/CertificateManagement'
-// import AdminLogin from '@/pages/admin/AdminLogin'
+// 👑 관리자 전용 페이지
+import AdminDashboard from '@/pages/admin/AdminDashboard'
+import UserManagement from '@/pages/admin/UserManagement'
+import JobManagement from '@/pages/admin/JobManagement'
+import CommunityManagement from '@/pages/admin/CommunityManagement'
+import CertificateManagement from '@/pages/admin/CertificateManagement'
+import AdminLogin from '@/pages/admin/AdminLogin'
 
 // 상태 관리 훅
 import { useAuthStore } from '@/hooks/useAuthStore'
@@ -125,23 +125,22 @@ function App() {
       <Route path="/auth/complete-profile" element={<CompleteProfile />} /> {/* 프로필 완성 */}
 
       {/*
-        👑 ADMIN ROUTES (관리자 전용) - 임시 주석처리 (관련 컴포넌트들이 누락됨)
+        👑 ADMIN ROUTES (관리자 전용)
         완전히 분리된 관리자 영역
         AdminRouteGuard를 통한 이중 보안 검증
       */}
-      {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
-      {/* <Route path="/admin/*" element={
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/*" element={
         <AdminRouteGuard>
-          <Layout />
+          <AdminLayout />
         </AdminRouteGuard>
       }>
-        <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="jobs" element={<JobManagement />} />
         <Route path="community" element={<CommunityManagement />} />
         <Route path="certificates" element={<CertificateManagement />} />
-        <Route index element={<Navigate to="/admin/dashboard" />} />
-      </Route> */}
+        <Route index element={<AdminDashboard />} />
+      </Route>
 
       {/*
         🔐 PROTECTED USER ROUTES (인증 필요)

@@ -349,4 +349,52 @@ public class JwtService {
     public String extractEmail(String token) {
         return extractUsername(token);
     }
+
+    /**
+     * 일반적인 액세스 토큰을 생성합니다.
+     *
+     * 기본 사용자 정보로 토큰을 생성하며, generateToken()과 동일한 기능을 수행합니다.
+     *
+     * @param user 토큰을 생성할 사용자
+     * @return String 생성된 JWT 액세스 토큰
+     */
+    public String createAccessToken(User user) {
+        return generateToken(user);
+    }
+
+    /**
+     * 어드민용 액세스 토큰을 생성합니다.
+     *
+     * 일반 사용자 토큰과 동일하지만 ADMIN 권한 정보를 명시적으로 추가합니다.
+     *
+     * @param user 어드민 사용자
+     * @return String 생성된 어드민 JWT 토큰
+     */
+    public String createAccessTokenForAdmin(User user) {
+        Map<String, Object> adminClaims = new HashMap<>();
+        adminClaims.put("role", "ADMIN");
+        adminClaims.put("isAdmin", true);
+
+        return generateToken(adminClaims, user);
+    }
+
+    /**
+     * 리프레시 토큰을 생성합니다.
+     *
+     * @param email 사용자 이메일
+     * @return String 생성된 리프레시 토큰
+     */
+    public String createRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("tokenType", "refresh");
+
+        return Jwts
+                .builder()
+                .setClaims(claims)
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
 }

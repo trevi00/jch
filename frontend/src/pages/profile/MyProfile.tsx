@@ -280,15 +280,14 @@ export default function MyProfile() {
               <p className="text-gray-600 mb-4">{user?.email}</p>
               
               <div className="space-y-2 text-sm">
-                <p className="text-gray-600">📊 사용자 ID: {profile.userId}</p>
-                <p className="text-gray-600">✅ {profile.message}</p>
+                {/* <p className="text-gray-600">📊 사용자 ID: {profile.userId}</p>
+                <p className="text-gray-600">✅ {profile.message}</p> */}
               </div>
               
               <button
                 onClick={() => setEditingSection('basic')}
                 className="btn-outline w-full mt-4"
               >
-                <Edit className="w-4 h-4 mr-2" />
                 기본 정보 수정
               </button>
             </div>

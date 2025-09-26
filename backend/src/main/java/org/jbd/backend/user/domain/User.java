@@ -1,6 +1,7 @@
 package org.jbd.backend.user.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.jbd.backend.common.entity.BaseEntity;
 import org.jbd.backend.user.domain.enums.EmploymentStatus;
 import org.jbd.backend.user.domain.enums.UserType;
@@ -115,6 +116,11 @@ public class User extends BaseEntity {
             throw new IllegalStateException("Company email must be verified before conversion");
         }
         this.userType = UserType.COMPANY;
+    }
+
+    public void convertToAdmin() {
+        this.userType = UserType.ADMIN;
+        this.adminConvertedAt = LocalDateTime.now();
     }
 
 

@@ -20,7 +20,11 @@ import {
   ChevronLeft,
   Check,
   Edit,
-  Trash2
+  Trash2,
+  UserCheck,
+  Mail,
+  Phone,
+  Building
 } from 'lucide-react'
 import { apiClient } from '@/services/api'
 import { JobType, ExperienceLevel, ApplicationStatus } from '@/types/api'
@@ -33,6 +37,8 @@ export default function JobDetail() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const [showApplicationModal, setShowApplicationModal] = useState(false)
+  const [selectedApplicant, setSelectedApplicant] = useState<any>(null)
+  const [showApplicantModal, setShowApplicantModal] = useState(false)
 
   const { data: jobData, isLoading, isError, error } = useQuery({
     queryKey: ['job', id],
@@ -41,9 +47,16 @@ export default function JobDetail() {
   })
 
   const { data: applicationData } = useQuery({
-    queryKey: ['job-application', id],
+    queryKey: ['job-application', id, user?.id],
     queryFn: () => apiClient.getMyApplications(),
     enabled: !!id && !!user,
+  })
+
+  // 기업 유저가 자신의 공고에 대한 지원자 목록을 가져오는 쿼리
+  const { data: applicantsData, isLoading: applicantsLoading, refetch: refetchApplicants } = useQuery({
+    queryKey: ['job-applicants', id],
+    queryFn: () => apiClient.getJobApplications(Number(id)),
+    enabled: false, // 일단 비활성화하고 나중에 refetch로 호출
   })
 
   const applyMutation = useMutation({
@@ -53,7 +66,9 @@ export default function JobDetail() {
         coverLetter: data.coverLetter,
       }),
     onSuccess: () => {
+      console.log('✅ Application submitted successfully - invalidating queries')
       queryClient.invalidateQueries({ queryKey: ['job-application', id] })
+      queryClient.invalidateQueries({ queryKey: ['job-applicants', id] }) // 지원자 목록도 새로고침
       setShowApplicationModal(false)
     },
   })
@@ -68,6 +83,20 @@ export default function JobDetail() {
   })
 
   const job = jobData?.data
+
+  // 채용공고 작성자인지 확인
+  const isJobAuthor = user?.userType === 'COMPANY' && user?.id === job?.companyUserId
+  const isAdmin = user?.userType === 'ADMIN'
+  const canEditJob = isJobAuthor || isAdmin
+
+  // 작성자인 경우에만 지원자 데이터 fetch
+  React.useEffect(() => {
+    console.log('🔍 JobDetail - isJobAuthor:', isJobAuthor)
+    if (isJobAuthor) {
+      console.log('🔄 Fetching applicants for job:', id)
+      refetchApplicants()
+    }
+  }, [isJobAuthor, id]) // refetchApplicants, user, job 제거하여 의존성 간소화
 
   if (isLoading) {
     return (
@@ -151,18 +180,20 @@ export default function JobDetail() {
     return labels[level] || level
   }
 
-  const userApplication = applicationData?.data?.content?.find(
-    app => app.userId === user?.id
-  )
+const userApplication = applicationData?.data?.content?.find(
+  app => app.jobPostingId === Number(id)
+)
 
   const getApplicationStatusLabel = (status: ApplicationStatus) => {
     const labels: Record<ApplicationStatus, string> = {
-      [ApplicationStatus.PENDING]: '서류 검토중',
-      [ApplicationStatus.REVIEWING]: '면접 진행중',
-      [ApplicationStatus.INTERVIEW]: '면접 진행중',
-      [ApplicationStatus.APPROVED]: '합격',
-      [ApplicationStatus.ACCEPTED]: '합격',
-      [ApplicationStatus.REJECTED]: '불합격'
+      [ApplicationStatus.SUBMITTED]: '지원 완료',
+      [ApplicationStatus.REVIEWED]: '검토 중',
+      [ApplicationStatus.DOCUMENT_PASSED]: '서류 합격',
+      [ApplicationStatus.INTERVIEW_SCHEDULED]: '면접 예정',
+      [ApplicationStatus.INTERVIEW_PASSED]: '면접 합격',
+      [ApplicationStatus.HIRED]: '최종 합격',
+      [ApplicationStatus.REJECTED]: '불합격',
+      [ApplicationStatus.WITHDRAWN]: '지원 철회'
     }
     return labels[status] || status
   }
@@ -171,10 +202,30 @@ export default function JobDetail() {
     applyMutation.mutate(data)
   }
 
-  // 채용공고 작성자인지 확인
-  const isJobAuthor = user?.userType === 'COMPANY' && user?.id === job?.companyUserId
-  const isAdmin = user?.userType === 'ADMIN'
-  const canEditJob = isJobAuthor || isAdmin
+  const formatAppliedDate = (appliedAt: any): string => {
+    try {
+      // 배열 형태인 경우 (백엔드 LocalDateTime 직렬화): [year, month, day, hour, minute, second, nano]
+      if (Array.isArray(appliedAt)) {
+        const [year, month, day] = appliedAt
+        return new Date(year, month - 1, day).toLocaleDateString('ko-KR')
+      }
+
+      // 문자열 형태인 경우
+      if (typeof appliedAt === 'string') {
+        return new Date(appliedAt).toLocaleDateString('ko-KR')
+      }
+
+      // 숫자 형태인 경우 (timestamp)
+      if (typeof appliedAt === 'number') {
+        return new Date(appliedAt).toLocaleDateString('ko-KR')
+      }
+
+      return '정보 없음'
+    } catch (error) {
+      console.warn('Date parsing error:', error, 'appliedAt:', appliedAt)
+      return '정보 없음'
+    }
+  }
 
   const handleDeleteJob = () => {
     if (window.confirm('정말로 이 채용공고를 삭제하시겠습니까?')) {
@@ -315,37 +366,39 @@ export default function JobDetail() {
 
         {/* 사이드바 */}
         <div className="space-y-6">
-          {/* 지원 버튼 */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-            <div className="p-6">
-              {userApplication ? (
-                <div className="text-center">
-                  <div className="mb-4">
-                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
-                      {getApplicationStatusLabel(userApplication.status)}
-                    </span>
+          {/* 지원 버튼 - 기업 유저는 지원할 수 없음 */}
+          {user?.userType !== 'COMPANY' && (
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="p-6">
+                {userApplication ? (
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full">
+                        {getApplicationStatusLabel(userApplication.status)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      지원일: {new Date(userApplication.appliedAt).toLocaleDateString()}
+                    </p>
+                    <Link
+                      to="/applications"
+                      className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      지원 현황 보기
+                    </Link>
                   </div>
-                  <p className="text-sm text-gray-600 mb-2">
-                    지원일: {new Date(userApplication.appliedAt).toLocaleDateString()}
-                  </p>
-                  <Link
-                    to="/applications"
-                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors"
+                ) : (
+                  <button
+                    onClick={() => setShowApplicationModal(true)}
+                    className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
+                    disabled={job.deadlineDate ? (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) : false}
                   >
-                    지원 현황 보기
-                  </Link>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowApplicationModal(true)}
-                  className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
-                  disabled={job.deadlineDate ? (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) : false}
-                >
-                  {job.deadlineDate && (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) ? '마감된 공고' : '지원하기'}
-                </button>
-              )}
+                    {job.deadlineDate && (Array.isArray(job.deadlineDate) ? new Date(job.deadlineDate[0], job.deadlineDate[1] - 1, job.deadlineDate[2]) < new Date() : new Date(job.deadlineDate) < new Date()) ? '마감된 공고' : '지원하기'}
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* 필요 기술 */}
           {job.requiredSkills && job.requiredSkills.length > 0 && (
@@ -393,6 +446,95 @@ export default function JobDetail() {
           {(isJobAuthor || isAdmin) && (
             <JobPostingStats jobId={job.id} />
           )}
+
+          {/* 지원자 목록 - 작성자만 볼 수 있음 */}
+          {isJobAuthor && (
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <UserCheck className="w-5 h-5 text-blue-600" />
+                    지원자 목록
+                  </h3>
+                  <div className="text-sm text-gray-600">
+                    총 {applicantsData?.data?.content?.length || applicantsData?.data?.length || 0}명 지원
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                {applicantsLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  </div>
+                ) : (applicantsData?.data?.content?.length || applicantsData?.data?.length) > 0 ? (
+                  <div className="space-y-4">
+                    {(applicantsData?.data?.content || applicantsData?.data || []).map((applicant: any) => (
+                      <div key={applicant.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="space-y-3">
+                          {/* 상단: 프로필과 지원서 보기 버튼 */}
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <UserCheck className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-gray-900">
+                                  {applicant.userName || '이름 없음'}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {applicant.userEmail || '이메일 없음'}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setSelectedApplicant(applicant)
+                                setShowApplicantModal(true)
+                              }}
+                              className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1.5 text-sm"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              지원서 보기
+                            </button>
+                          </div>
+
+                          {/* 하단: 지원일과 상태 */}
+                          <div className="flex items-center gap-6 pl-13">
+                            <div className="flex items-center gap-2">
+                              <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                                <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                              </div>
+                              <span className="text-sm text-gray-500">지원날짜:</span>
+                              <span className="text-sm text-gray-900 font-medium">
+                                {applicant.appliedAt ? formatAppliedDate(applicant.appliedAt) : '정보 없음'}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">상태:</span>
+                              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                applicant.status === 'SUBMITTED' ? 'bg-blue-100 text-blue-700' :
+                                applicant.status === 'REVIEWED' ? 'bg-yellow-100 text-yellow-700' :
+                                applicant.status === 'DOCUMENT_PASSED' ? 'bg-green-100 text-green-700' :
+                                applicant.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {applicant.status ? getApplicationStatusLabel(applicant.status) : '정보 없음'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <UserCheck className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>아직 지원자가 없습니다.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -403,6 +545,18 @@ export default function JobDetail() {
           onClose={() => setShowApplicationModal(false)}
           onSubmit={handleApply}
           isLoading={applyMutation.isPending}
+        />
+      )}
+
+      {/* 지원자 상세보기 모달 */}
+      {showApplicantModal && selectedApplicant && (
+        <ApplicantDetailModal
+          applicant={selectedApplicant}
+          jobTitle={job.title}
+          onClose={() => {
+            setShowApplicantModal(false)
+            setSelectedApplicant(null)
+          }}
         />
       )}
     </div>
@@ -817,6 +971,212 @@ function ApplicationModal({ jobTitle, onClose, onSubmit, isLoading }: Applicatio
               </div>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface ApplicantDetailModalProps {
+  applicant: any
+  jobTitle: string
+  onClose: () => void
+}
+
+function ApplicantDetailModal({ applicant, jobTitle, onClose }: ApplicantDetailModalProps) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('ko-KR')
+  }
+
+  const formatAppliedDate = (appliedAt: any): string => {
+    try {
+      // 배열 형태인 경우 (백엔드 LocalDateTime 직렬화): [year, month, day, hour, minute, second, nano]
+      if (Array.isArray(appliedAt)) {
+        const [year, month, day] = appliedAt
+        return new Date(year, month - 1, day).toLocaleDateString('ko-KR')
+      }
+
+      // 문자열 형태인 경우
+      if (typeof appliedAt === 'string') {
+        return new Date(appliedAt).toLocaleDateString('ko-KR')
+      }
+
+      // 숫자 형태인 경우 (timestamp)
+      if (typeof appliedAt === 'number') {
+        return new Date(appliedAt).toLocaleDateString('ko-KR')
+      }
+
+      return '정보 없음'
+    } catch (error) {
+      console.warn('Date parsing error:', error, 'appliedAt:', appliedAt)
+      return '정보 없음'
+    }
+  }
+
+  const getApplicationStatusLabel = (status: ApplicationStatus) => {
+    const labels: Record<ApplicationStatus, string> = {
+      [ApplicationStatus.SUBMITTED]: '지원 완료',
+      [ApplicationStatus.REVIEWED]: '검토 중',
+      [ApplicationStatus.DOCUMENT_PASSED]: '서류 합격',
+      [ApplicationStatus.INTERVIEW_SCHEDULED]: '면접 예정',
+      [ApplicationStatus.INTERVIEW_PASSED]: '면접 합격',
+      [ApplicationStatus.HIRED]: '최종 합격',
+      [ApplicationStatus.REJECTED]: '불합격',
+      [ApplicationStatus.WITHDRAWN]: '지원 철회'
+    }
+    return labels[status] || status
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
+
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 flex items-center">
+                <UserCheck className="w-6 h-6 mr-2 text-blue-600" />
+                지원자 상세정보
+              </h2>
+              <p className="text-gray-600 mt-1">{jobTitle}</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-lg"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ maxHeight: 'calc(90vh - 100px)' }}>
+
+          {/* 지원자 기본 정보 */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <UserCheck className="w-5 h-5 text-blue-600" />
+              지원자 정보
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <UserCheck className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">지원자명</p>
+                  <p className="font-medium text-gray-900">
+                    {applicant.userName || '이름 없음'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <Mail className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">이메일</p>
+                  <p className="font-medium text-gray-900">
+                    {applicant.userEmail || '이메일 없음'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-orange-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">지원일</p>
+                  <p className="font-medium text-gray-900">
+                    {applicant.appliedAt ? formatAppliedDate(applicant.appliedAt) : '정보 없음'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <Clock className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">지원 상태</p>
+                  <p className="font-medium text-gray-900">
+                    {applicant.status ? getApplicationStatusLabel(applicant.status) : '정보 없음'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 자기소개서 */}
+          <div className="bg-white border border-gray-200 rounded-lg">
+            <div className="px-4 py-3 bg-gray-50 border-b rounded-t-lg">
+              <h4 className="font-medium text-gray-900 flex items-center">
+                <FileText className="w-4 h-4 mr-2" />
+                자기소개서
+              </h4>
+            </div>
+            <div className="p-4">
+              <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                {applicant.coverLetter || '자기소개서가 제출되지 않았습니다.'}
+              </div>
+            </div>
+          </div>
+
+          {/* 첨부 파일 정보 */}
+          {applicant.resumeUrl && (
+            <div className="bg-white border border-gray-200 rounded-lg">
+              <div className="px-4 py-3 bg-gray-50 border-b rounded-t-lg">
+                <h4 className="font-medium text-gray-900 flex items-center">
+                  <Upload className="w-4 h-4 mr-2" />
+                  첨부 이력서
+                </h4>
+              </div>
+              <div className="p-4">
+                <div className="flex items-center space-x-3">
+                  <FileText className="w-6 h-6 text-blue-400" />
+                  <div>
+                    <p className="text-gray-900 font-medium">이력서 파일</p>
+                    <p className="text-sm text-gray-500">
+                      URL: {applicant.resumeUrl}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 지원자 통계 */}
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h4 className="font-medium text-gray-900 mb-3">지원 요약</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-blue-600">{applicant.id}</p>
+                <p className="text-sm text-gray-600">지원 번호</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-green-600">
+                  {applicant.coverLetter ? Math.ceil(applicant.coverLetter.length / 100) : 0}
+                </p>
+                <p className="text-sm text-gray-600">자기소개서 (100자 단위)</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-orange-600">
+                  {applicant.resumeUrl ? 1 : 0}
+                </p>
+                <p className="text-sm text-gray-600">첨부 파일</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-4 bg-gray-50 border-t flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+          >
+            닫기
+          </button>
         </div>
       </div>
     </div>

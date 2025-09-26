@@ -52,4 +52,14 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     // 면접 유형별 통계
     @Query("SELECT i.interviewType, COUNT(i), AVG(i.overallScore) FROM Interview i WHERE i.user = :user AND i.status = :status AND i.isDeleted = false GROUP BY i.interviewType")
     List<Object[]> findInterviewStatsByUserAndStatus(@Param("user") User user, @Param("status") InterviewStatus status);
+
+    // 관리자 대시보드용 전체 면접 통계
+    @Query("SELECT COUNT(i) FROM Interview i WHERE i.isDeleted = false")
+    Long countTotalInterviews();
+
+    @Query("SELECT COUNT(i) FROM Interview i WHERE i.status = :status AND i.isDeleted = false")
+    Long countInterviewsByStatus(@Param("status") InterviewStatus status);
+
+    @Query("SELECT AVG(i.overallScore) FROM Interview i WHERE i.status = :status AND i.isDeleted = false")
+    Double findAverageScoreByStatus(@Param("status") InterviewStatus status);
 }

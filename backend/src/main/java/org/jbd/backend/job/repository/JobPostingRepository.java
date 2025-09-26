@@ -138,8 +138,8 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long>, J
      */
     @Query("SELECT " +
            "COUNT(*) as totalJobPostings, " +
-           "COUNT(CASE WHEN jp.status = 'PUBLISHED' THEN 1 END) as activeJobPostings, " +
-           "COUNT(CASE WHEN jp.status = 'CLOSED' THEN 1 END) as closedJobPostings, " +
+           "COUNT(CASE WHEN jp.status = org.jbd.backend.job.domain.enums.JobStatus.PUBLISHED THEN 1 END) as activeJobPostings, " +
+           "COUNT(CASE WHEN jp.status = org.jbd.backend.job.domain.enums.JobStatus.CLOSED THEN 1 END) as closedJobPostings, " +
            "COUNT(CASE WHEN jp.createdAt >= :weekAgo THEN 1 END) as thisWeekJobPostings " +
            "FROM JobPosting jp")
     Object[] findJobPostingStatistics(@Param("weekAgo") LocalDateTime weekAgo);
@@ -148,7 +148,7 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long>, J
      * 마감 임박 채용공고 조회 (N일 이내)
      */
     @EntityGraph(attributePaths = {"companyUser"})
-    @Query("SELECT j FROM JobPosting j WHERE j.status = 'PUBLISHED' " +
+    @Query("SELECT j FROM JobPosting j WHERE j.status = org.jbd.backend.job.domain.enums.JobStatus.PUBLISHED " +
            "AND j.deadlineDate BETWEEN :now AND :deadline " +
            "ORDER BY j.deadlineDate ASC")
     List<JobPosting> findDeadlineApproachingJobPostings(@Param("now") LocalDate now,
@@ -159,7 +159,7 @@ public interface JobPostingRepository extends JpaRepository<JobPosting, Long>, J
      */
     @EntityGraph(attributePaths = {"companyUser"})
     @Query("SELECT j FROM JobPosting j WHERE j.companyUser = :companyUser " +
-           "AND j.status = 'PUBLISHED' " +
+           "AND j.status = org.jbd.backend.job.domain.enums.JobStatus.PUBLISHED " +
            "AND j.deadlineDate BETWEEN :now AND :deadline " +
            "ORDER BY j.deadlineDate ASC")
     List<JobPosting> findDeadlineApproachingJobPostingsByCompany(@Param("companyUser") User companyUser,

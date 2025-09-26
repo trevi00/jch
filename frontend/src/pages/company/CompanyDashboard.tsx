@@ -386,14 +386,15 @@ export default function CompanyDashboard() {
               <div className="space-y-4">
                 {recentJobPostings.length > 0 ? (
                   recentJobPostings.map((job: any) => (
-                    <div key={job.id} className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                    <Link
+                      key={job.id}
+                      to={`/jobs/${job.id}`}
+                      className="block p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-primary-300 transition-all cursor-pointer"
+                    >
                       <div className="flex justify-between items-start mb-2">
-                        <Link
-                          to={`/jobs/${job.id}`}
-                          className="font-medium text-gray-900 dark:text-gray-100 hover:text-primary-600 text-sm"
-                        >
+                        <h4 className="font-medium text-gray-900 dark:text-gray-100 hover:text-primary-600 text-sm">
                           {job.title}
-                        </Link>
+                        </h4>
                         <Badge variant="success" size="sm">진행중</Badge>
                       </div>
                       <div className="space-y-1">
@@ -404,7 +405,7 @@ export default function CompanyDashboard() {
                           등록: {formatDate(job.createdAt)}
                         </p>
                       </div>
-                    </div>
+                    </Link>
                   ))
                 ) : (
                   <div className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">

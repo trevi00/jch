@@ -115,12 +115,16 @@ public class SecurityConfig {
 
                         // 인증 관련 엔드포인트는 모두 허용
                         // - /auth/** : 회원가입, 로그인, 토큰 갱신 등
-                        // - /admin/login, /admin/verify : 관리자 로그인
+                        // - /admin/login, /admin/verify, /admin/promote : 관리자 로그인 및 권한 부여
                         // - /oauth2/**, /login/oauth2/** : OAuth2 로그인 흐름
                         .requestMatchers(
                                 "/auth/**",
                                 "/admin/login",
                                 "/admin/verify",
+                                "/admin/promote",
+                                "/api/admin/login",
+                                "/api/admin/verify",
+                                "/api/admin/promote",
                                 "/oauth2/**",
                                 "/login/oauth2/**"
                         ).permitAll()

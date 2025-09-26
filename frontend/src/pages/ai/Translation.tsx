@@ -321,12 +321,12 @@ export default function Translation() {
               />
               
               <div className="flex justify-between items-center mt-4">
-                <div className="flex space-x-2">
+                {/* <div className="flex space-x-2">
                   <button className="btn-outline text-sm">
                     <Upload className="w-4 h-4 mr-1" />
                     파일 업로드
                   </button>
-                </div>
+                </div> */}
                 
                 <button
                   onClick={handleTranslate}
@@ -350,7 +350,7 @@ export default function Translation() {
           </div>
 
           {/* 템플릿 번역 */}
-          <div className="card">
+          {/* <div className="card">
             <div className="card-header">
               <h2 className="text-lg font-semibold">템플릿 번역</h2>
             </div>
@@ -388,7 +388,7 @@ export default function Translation() {
                 템플릿으로 번역하기
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* 번역 결과 */}
@@ -432,8 +432,9 @@ export default function Translation() {
                 </div>
               </div>
 
+
               {/* 품질 평가 */}
-              <div className="card">
+              {/* <div className="card">
                 <div className="card-header">
                   <div className="flex justify-between items-center">
                     <h2 className="text-lg font-semibold">번역 품질 평가</h2>
@@ -454,7 +455,6 @@ export default function Translation() {
                 
                 {result.quality ? (
                   <div className="card-content space-y-6">
-                    {/* 종합 점수 및 등급 */}
                     <div className="text-center bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
                       <div className="flex items-center justify-center space-x-6">
                         <div>
@@ -486,7 +486,6 @@ export default function Translation() {
                       </div>
                     </div>
 
-                    {/* 세부 평가 기준 */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       <div className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
@@ -539,7 +538,6 @@ export default function Translation() {
                       </div>
                     </div>
 
-                    {/* AI 평가 의견 */}
                     <div className="p-4 bg-blue-50 rounded-lg">
                       <h4 className="font-medium text-blue-900 mb-2">💡 AI 전문가 의견</h4>
                       <p className="text-sm text-blue-800 leading-relaxed">
@@ -547,7 +545,6 @@ export default function Translation() {
                       </p>
                     </div>
 
-                    {/* 장점과 개선점 */}
                     {(result.quality.strengths?.length > 0 || result.quality.improvements?.length > 0) && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {result.quality.strengths?.length > 0 && (
@@ -594,6 +591,8 @@ export default function Translation() {
                   </div>
                 )}
               </div>
+             /* */}
+
             </>
           )}
 

@@ -217,7 +217,7 @@ export default function InteractiveCoverLetter() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Brain className="w-5 h-5" />
-              AI 인터랙티브 자소서 생성
+              AI 자기소개서 생성
             </CardTitle>
             <p className="text-sm text-gray-600">
               AI가 단계별로 질문하며 맞춤형 자기소개서를 생성해드립니다.
@@ -286,7 +286,7 @@ export default function InteractiveCoverLetter() {
               ) : (
                 <MessageCircle className="w-4 h-4 mr-2" />
               )}
-              인터랙티브 생성 시작
+              자기소개서 생성 시작
             </Button>
           </CardContent>
         </Card>

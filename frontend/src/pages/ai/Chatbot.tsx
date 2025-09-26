@@ -235,7 +235,7 @@ export default function Chatbot() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-6xl ">
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-3 mb-4">
           <div className="p-3 bg-gradient-to-br from-primary-500 to-purple-600 rounded-full" aria-hidden="true">
@@ -250,7 +250,7 @@ export default function Chatbot() {
         </p>
       </div>
 
-      <Card className="h-[600px] flex flex-col">
+      <Card className="h-[800px] flex flex-col">
         <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
           <div className="flex items-center gap-2">
             <MessageCircle className="h-5 w-5 text-primary-500 dark:text-primary-400" />
@@ -291,7 +291,7 @@ export default function Chatbot() {
 
         <CardContent className="flex-1 flex flex-col overflow-hidden">
           {/* 제안 섹션 */}
-          {showSuggestions && messages.length <= 1 && (
+          {showSuggestions && (
             <div className="mb-4 p-4 bg-gray-50 rounded-lg">
               <h3 className="font-medium mb-3 flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-yellow-500" />
@@ -322,13 +322,16 @@ export default function Chatbot() {
                 ) : (
                   (suggestionsData?.success && suggestionsData.data ? suggestionsData.data : DEFAULT_SUGGESTIONS).map((category: any, index: number) => (
                     <div key={index}>
-                      <p className="text-sm font-medium text-gray-700 mb-2">{category.category}</p>
-                      <div className="flex flex-wrap gap-2">
+
+                      <p className="text-1xl font-medium text-blue-600 mb-4">{category.category}</p>
+                      
+                      <div className="flex flex-wrap gap-4">
                         {category.suggestions.map((suggestion: string, sugIndex: number) => (
                           <Badge
                             key={sugIndex}
                             variant="secondary"
-                            className="cursor-pointer hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                            className="cursor-pointer hover:bg-blue-100 hover:text-blue-700 transition-colors
+                                             px-4 py-1 text-sm font-medium" 
                             onClick={() => handleSuggestionClick(suggestion)}
                           >
                             {suggestion}

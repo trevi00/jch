@@ -47,8 +47,8 @@ const menuItems = [
     icon: Brain,
     subItems: [
       { title: 'AI 챗봇', icon: Bot, path: '/ai/chatbot' },
-      { title: 'AI 면접', icon: MessageSquare, path: '/ai/interview' },
-      { title: '자소서 생성', icon: FileText, path: '/ai/cover-letter' },
+      { title: 'AI 모의면접', icon: MessageSquare, path: '/ai/interview' },
+      { title: '자기소개서 생성', icon: FileText, path: '/ai/cover-letter' },
       { title: 'AI 번역', icon: Languages, path: '/ai/translation' },
     ],
   },
@@ -64,7 +64,6 @@ const menuItems = [
   },
 ]
 
-
 interface SidebarProps {
   isOpen?: boolean
   onClose?: () => void
@@ -75,6 +74,34 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const { user } = useAuthStore()
   const [expandedItems, setExpandedItems] = useState<string[]>(['AI 서비스'])
   const [isMobile, setIsMobile] = useState(false)
+
+  // 사용자 타입에 따른 메뉴 활성화/비활성화 상태 확인
+  const isMenuItemEnabled = (path: string) => {
+    if (path === '/ai/interview') {
+      return user?.userType === UserType.GENERAL
+    }
+    if (path === '/ai/cover-letter') {
+      return user?.userType === UserType.GENERAL
+    }
+    if (path === '/certificates') {
+      return user?.userType === UserType.GENERAL
+    }
+    return true
+  }
+
+  // 비활성화된 메뉴에 대한 툴팁 메시지
+  const getDisabledMessage = (path: string) => {
+    if (path === '/ai/interview') {
+      return '개인회원만 이용 가능한 서비스입니다'
+    }
+    if (path === '/ai/cover-letter') {
+      return '개인회원만 이용 가능한 서비스입니다'
+    }
+    if (path === '/certificates') {
+      return '개인회원만 이용 가능한 서비스입니다'
+    }
+    return ''
+  }
 
   const displayMenuItems = menuItems
 
@@ -167,39 +194,73 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                     role="menu"
                     aria-label={`${item.title} 하위 메뉴`}
                   >
-                    {item.subItems.map((subItem) => (
-                      <Link
-                        key={subItem.path}
-                        to={subItem.path}
-                        onClick={isMobile ? onClose : undefined}
-                        className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
-                          location.pathname === subItem.path
-                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600 dark:border-primary-400 font-medium'
-                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-                        }`}
-                        role="menuitem"
-                        aria-current={location.pathname === subItem.path ? 'page' : undefined}
-                      >
-                        <subItem.icon className="w-4 h-4 mr-3" />
-                        {subItem.title}
-                      </Link>
-                    ))}
+                    {item.subItems.map((subItem) => {
+                      const isEnabled = isMenuItemEnabled(subItem.path)
+                      const disabledMessage = getDisabledMessage(subItem.path)
+                      
+                      return isEnabled ? (
+                        <Link
+                          key={subItem.path}
+                          to={subItem.path}
+                          onClick={isMobile ? onClose : undefined}
+                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+                            location.pathname === subItem.path
+                              ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600 dark:border-primary-400 font-medium'
+                              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                          }`}
+                          role="menuitem"
+                          aria-current={location.pathname === subItem.path ? 'page' : undefined}
+                        >
+                          <subItem.icon className="w-4 h-4 mr-3" />
+                          {subItem.title}
+                        </Link>
+                      ) : (
+                        <div
+                          key={subItem.path}
+                          className="flex items-center px-3 py-2 text-sm rounded-lg text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
+                          role="menuitem"
+                          aria-disabled="true"
+                          title={disabledMessage}
+                        >
+                          <subItem.icon className="w-4 h-4 mr-3" />
+                          <span>{subItem.title}</span>
+                          <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+                            개인회원 전용
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               ) : (
-                <Link
-                  to={item.path}
-                  onClick={isMobile ? onClose : undefined}
-                  className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
-                    location.pathname === item.path
-                      ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600 dark:border-primary-400 font-medium'
-                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
-                  }`}
-                  aria-current={location.pathname === item.path ? 'page' : undefined}
-                >
-                  <item.icon className="w-5 h-5 mr-3" />
-                  {item.title}
-                </Link>
+                // 일반 메뉴 항목에 대한 활성화/비활성화 처리
+                isMenuItemEnabled(item.path) ? (
+                  <Link
+                    to={item.path}
+                    onClick={isMobile ? onClose : undefined}
+                    className={`flex items-center px-3 py-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+                      location.pathname === item.path
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 border-r-2 border-primary-600 dark:border-primary-400 font-medium'
+                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
+                    }`}
+                    aria-current={location.pathname === item.path ? 'page' : undefined}
+                  >
+                    <item.icon className="w-5 h-5 mr-3" />
+                    {item.title}
+                  </Link>
+                ) : (
+                  <div
+                    className="flex items-center px-3 py-2 rounded-lg text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60"
+                    aria-disabled="true"
+                    title={getDisabledMessage(item.path)}
+                  >
+                    <item.icon className="w-5 h-5 mr-3" />
+                    <span>{item.title}</span>
+                    <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+                      개인회원 전용
+                    </span>
+                  </div>
+                )
               )}
             </div>
           ))}

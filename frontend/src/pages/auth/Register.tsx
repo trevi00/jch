@@ -93,7 +93,7 @@ export default function Register() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <Link to="/" className="flex justify-center">
-            <span className="text-3xl font-bold text-primary-600">잡았다</span>
+            <span className="text-6xl font-bold text-primary-600">JOB았다</span>
           </Link>
           <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
             회원가입

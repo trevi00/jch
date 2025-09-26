@@ -460,4 +460,18 @@ public class UserService {
         // 실제 계정 잠금 기능을 위해서는 스키마에 lock_until 필드 추가 또는 별도 테이블 사용 가능
         logger.info("계정 잠금이 해제되었습니다. userId: {}", userId);
     }
+
+    /**
+     * 비밀번호 유효성 검증
+     */
+    public boolean validatePassword(String rawPassword, String encodedPassword) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+
+    /**
+     * 사용자 엔티티 업데이트
+     */
+    public User updateUser(User user) {
+        return userRepository.save(user);
+    }
 }

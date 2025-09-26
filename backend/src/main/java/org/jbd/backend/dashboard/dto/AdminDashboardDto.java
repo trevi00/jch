@@ -117,39 +117,15 @@ public class AdminDashboardDto {
     public static class AiServiceStatisticsDto {
         // AI 면접 통계
         private Long totalInterviews;
-        private Long todayInterviews;
-        private Long technicalInterviews;
-        private Long personalityInterviews;
+        private Long completedInterviews;
         private Double averageInterviewScore;
-        
-        // 자소서 생성 통계
-        private Long totalCoverLetters;
-        private Long todayCoverLetters;
-        private Long interactiveCoverLetters;
-        private Long ragBasedGenerations;
-        
-        // 번역 서비스 통계
-        private Long totalTranslations;
-        private Long todayTranslations;
-        private Long documentTranslations;
-        private Long emailTranslations;
-        
+
         // 이미지 생성 통계
         private Long totalImageGenerations;
-        private Long todayImageGenerations;
-        private Long communityImages;
-        
-        // 챗봇 서비스 통계
-        private Long totalChatInteractions;
-        private Long todayChatInteractions;
-        private Long supportQueries;
-        private Long generalQueries;
-        private Double chatSatisfactionRate;
-        
+
         // 감정분석 통계
         private Long totalSentimentAnalyses;
         private Long positivePosts;
-        private Long neutralPosts;
         private Long negativePosts;
         private Double positivityRate;
     }

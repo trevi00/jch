@@ -408,7 +408,6 @@ export default function Interview() {
                 </>
               ) : (
                 <>
-                  <Play className="w-5 h-5 mr-2" />
                   면접 시작하기
                 </>
               )}
@@ -483,14 +482,14 @@ export default function Interview() {
                   <Target className="w-5 h-5 mr-2 text-primary-600" />
                   답변 작성
                 </CardTitle>
-                <Button
+                {/* <Button
                   onClick={toggleRecording}
                   variant={isRecording ? 'destructive' : 'outline'}
                   size="sm"
                   className="p-2"
                 >
                   {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                </Button>
+                </Button> */}
               </div>
             </CardHeader>
             <CardContent className="space-y-4">

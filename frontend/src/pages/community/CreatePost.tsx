@@ -71,6 +71,10 @@ export default function CreatePost() {
     if (category.name === '공지') {
       return user?.userType === 'ADMIN'
     }
+
+    if (category.name === '면접정보') {
+      return user?.userType !== 'COMPANY'
+    }
     return true
   }
 

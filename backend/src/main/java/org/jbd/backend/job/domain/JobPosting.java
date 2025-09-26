@@ -44,7 +44,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(name = "job_postings")
-public class JobPosting extends BaseEntity {
+public class    JobPosting extends BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -77,6 +77,10 @@ export default function Community() {
     if (categoryName === '기업게시판') {
       return user?.userType !== 'GENERAL'
     }
+        if (categoryName === '면접정보') {
+      return user?.userType !== 'COMPANY'
+    }
+
     // 공지는 모든 사용자가 볼 수 있음 (읽기 권한)
     return true
   }
@@ -114,7 +118,7 @@ export default function Community() {
         </div>
         {canCreatePost() && (
           <Link to="/community/new" className="btn-primary">
-            <Plus className="w-5 h-4 mr-2" />
+            <Plus className="w-5 h-4 mr-" />
             글 작성
           </Link>
         )}
@@ -172,6 +176,10 @@ export default function Community() {
             if (user?.userType === 'GENERAL' && post.categoryName === '기업게시판') {
               return false;
             }
+                       if (user?.userType === 'COMPANY' && post.categoryName === '면접정보') {
+              return false;
+            }
+ 
             return true;
           })
           .map((post) => (
@@ -255,6 +263,10 @@ export default function Community() {
             if (user?.userType === 'GENERAL' && post.categoryName === '기업게시판') {
               return false;
             }
+                      if (user?.userType === 'COMPANY' && post.categoryName === '면접정보') {
+              return false;
+            }
+  
             return true;
           }).length === 0 && (
           <div className="text-center py-12">

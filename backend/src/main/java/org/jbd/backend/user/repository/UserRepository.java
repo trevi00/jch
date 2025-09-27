@@ -97,4 +97,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "COUNT(CASE WHEN u.oauthProvider = org.jbd.backend.user.domain.enums.OAuthProvider.GOOGLE THEN 1 END) as googleCount " +
            "FROM User u WHERE u.isDeleted = false AND u.isActive = true")
     Object[] findOAuthProviderStatistics();
+
+    /**
+     * UserType별 사용자 수 카운트
+     */
+    long countByUserType(UserType userType);
 }

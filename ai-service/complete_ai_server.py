@@ -25,7 +25,9 @@ app = FastAPI(
 )
 
 # OpenAI 클라이언트 초기화
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "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")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise ValueError("OPENAI_API_KEY environment variable is required")
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # CORS 설정
@@ -157,26 +159,34 @@ rag_sessions = {}
 # RAG 데이터 저장소
 resume_templates = {}
 
-# Mock 응답 데이터베이스 (기존 챗봇용)
-mock_responses = {
+# Mock 응답 데이터베이스 - 한국어 우선
+korean_responses = {
     "회원가입": "잡았다 플랫폼 회원가입은 구글 OAuth 또는 이메일로 가능합니다. 메인 페이지에서 '회원가입' 버튼을 클릭해주세요.",
+    "가입": "회원가입은 메인 페이지에서 '회원가입' 버튼을 클릭해주세요.",
+    "로그인": "로그인 문제가 있으시면 이메일/비밀번호를 확인하고, 브라우저 캐시를 삭제해보세요.",
+    "AI 면접": "AI 면접 기능은 로그인 후 'AI 면접' 메뉴에서 이용 가능합니다. 기술면접과 인성면접을 선택할 수 있습니다.",
+    "면접": "AI 면접 기능을 이용하여 면접 연습을 하실 수 있습니다. 로그인 후 'AI 면접' 메뉴를 확인해주세요.",
+    "자소서": "자소서 생성 기능은 기업과 직무를 입력하면 AI가 단계별 질문을 제공하여 맞춤형 자소서를 생성해드립니다.",
+    "번역": "문서 번역 기능은 '문서 번역' 메뉴에서 문서 유형을 선택하고 텍스트를 입력하면 이용 가능합니다.",
+    "증명서": "증명서 신청은 마이페이지에서 원하는 증명서 종류를 선택하여 신청할 수 있습니다.",
+    "안녕": "안녕하세요! 잡았다 AI 챗봇입니다. 무엇을 도와드릴까요?",
+    "도움": "저는 회원가입, 로그인, AI 면접, 자소서 생성, 문서 번역, 증명서 발급 등에 대해 도움을 드릴 수 있습니다.",
+    "사용법": "잡았다 플랫폼의 주요 기능은 AI 면접, 자소서 생성, 문서 번역, 증명서 발급입니다. 각 메뉴에서 기능을 이용하실 수 있습니다.",
+    "기능": "AI 면접 연습, 자소서 생성, 문서 번역, 증명서 발급 등의 기능을 제공합니다.",
+    "문의": "궁금한 사항이 있으시면 언제든 질문해주세요. 구체적인 기능에 대해 물어보시면 더 정확한 답변을 드릴 수 있습니다."
+}
+
+english_responses = {
     "sign up": "You can sign up for the JBD platform using Google OAuth or email. Please click the 'Sign Up' button on the main page.",
     "signup": "You can sign up for the JBD platform using Google OAuth or email. Please click the 'Sign Up' button on the main page.",
-    "로그인": "로그인 문제가 있으시면 이메일/비밀번호를 확인하고, 브라우저 캐시를 삭제해보세요.",
     "login": "If you have login issues, please check your email/password and clear your browser cache.",
-    "AI 면접": "AI 면접 기능은 로그인 후 'AI 면접' 메뉴에서 이용 가능합니다. 기술면접과 인성면접을 선택할 수 있습니다.",
     "ai interview": "AI Interview feature is available in the 'AI Interview' menu after login. You can choose technical or personality interviews.",
     "interview": "AI Interview feature is available in the 'AI Interview' menu after login. You can choose technical or personality interviews.",
-    "자소서": "자소서 생성 기능은 기업과 직무를 입력하면 AI가 단계별 질문을 제공하여 맞춤형 자소서를 생성해드립니다.",
     "cover letter": "The cover letter generation feature provides step-by-step questions from AI to create customized cover letters when you input company and job information.",
-    "번역": "문서 번역 기능은 '문서 번역' 메뉴에서 문서 유형을 선택하고 텍스트를 입력하면 이용 가능합니다.",
     "translate": "Document translation is available in the 'Document Translation' menu where you select document type and input text.",
-    "증명서": "증명서 신청은 마이페이지에서 원하는 증명서 종류를 선택하여 신청할 수 있습니다.",
     "certificate": "Certificate applications can be made by selecting the desired certificate type in My Page.",
-    "안녕": "안녕하세요! 잡았다 AI 챗봇입니다. 무엇을 도와드릴까요?",
     "hello": "Hello! I'm the JBD AI Chatbot. How can I help you?",
     "hi": "Hello! I'm the JBD AI Chatbot. How can I help you?",
-    "도움": "저는 회원가입, 로그인, AI 면접, 자소서 생성, 문서 번역, 증명서 발급 등에 대해 도움을 드릴 수 있습니다.",
     "help": "I can help with sign up, login, AI interviews, cover letter generation, document translation, certificate issuance, and more.",
     "thank": "You're welcome! Feel free to ask if you need more help with the JBD platform."
 }
@@ -417,13 +427,20 @@ resume_templates = load_resume_templates()
 # =======================
 
 def get_mock_response(message: str) -> str:
-    """메시지에 따른 Mock 응답 생성"""
+    """메시지에 따른 Mock 응답 생성 - 한국어 우선 처리"""
     message_lower = message.lower().strip()
-    
-    for keyword, response in mock_responses.items():
+
+    # 1. 한국어 응답 먼저 확인
+    for keyword, response in korean_responses.items():
         if keyword in message_lower:
             return response
-    
+
+    # 2. 영어 응답 확인 (한국어로 응답이 없는 경우)
+    for keyword, response in english_responses.items():
+        if keyword in message_lower:
+            return response
+
+    # 3. 기본 응답 (한국어)
     return "죄송합니다. 구체적인 질문을 입력해주시면 더 정확한 답변을 드릴 수 있습니다. 예: '회원가입 방법', 'AI 면접 사용법', '자소서 생성' 등"
 
 def generate_interview_questions(field: str, level: str, interview_type: str, count: int = 5) -> List[InterviewQuestion]:

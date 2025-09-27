@@ -116,13 +116,19 @@ export default function Webmail() {
 
   const handleSendEmail = () => {
     if (!formData.to || !formData.subject || !formData.content) return
-    
-    // from 필드가 있으면 본문에 포함
-    const emailData = { ...formData }
-    if (formData.from && formData.from.trim()) {
-      emailData.content = `From: ${formData.from}\n\n${formData.content}`
+
+    // Prepare email data matching backend SendEmailRequest DTO
+    const emailData = {
+      to: formData.to,
+      subject: formData.subject,
+      content: formData.content,
+      translationNeeded: formData.translationNeeded,
+      sourceLanguage: formData.sourceLanguage,
+      targetLanguage: formData.targetLanguage,
+      documentType: formData.documentType,
+      from: formData.from
     }
-    
+
     sendEmailMutation.mutate(emailData)
   }
 

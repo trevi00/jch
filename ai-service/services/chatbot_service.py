@@ -146,7 +146,7 @@ class ChatbotService:
             del self.user_sessions[user_id]
             logger.info(f"사용자 {user_id}의 세션이 초기화되었습니다")
     
-    async def chat(self, user_id: str, message: str) -> Dict[str, Any]:
+    async def chat(self, user_id: str, message: str, language: str = "ko") -> Dict[str, Any]:
         """챗봇과 대화"""
         if not self.chat_engine:
             return {
@@ -154,18 +154,33 @@ class ChatbotService:
                 "response": "죄송합니다. 현재 챗봇 서비스를 이용할 수 없습니다. 잠시 후 다시 시도해주세요.",
                 "error": "chat_engine_not_available"
             }
-        
+
         try:
             # 사용자 세션 가져오기
             session = self.get_user_session(user_id)
-            
+
             logger.info(f"사용자 {user_id} 질문: {message}")
-            
-            # 한국어 답변을 유도하는 메시지 추가
-            korean_prompt = f"[한국어로만 답변] 당신은 '잡았다' 취업 플랫폼의 전문 상담사입니다. 친근하고 정중한 한국어로 취업 관련 조언을 제공해주세요. 질문: {message}"
+
+            # 언어별 프롬프트 설정
+            if language == "ko":
+                system_prompt = f"""당신은 한국의 '잡았다' 취업 플랫폼의 전문 상담사입니다.
+IMPORTANT: 반드시 한국어로만 응답해주세요. Do NOT respond in English.
+모든 답변은 한국어로 작성하세요. 영어로 대답하지 마세요.
+사용자의 취업 관련 질문에 친근하고 정중한 한국어로 답변해주세요.
+
+사용자 질문: {message}
+
+한국어로 답변:"""
+            else:
+                system_prompt = f"""You are a professional consultant for '잡았다' employment platform.
+Please respond in a friendly and professional manner.
+
+User question: {message}
+
+Answer:"""
             
             # 채팅 엔진으로 응답 생성
-            response = self.chat_engine.chat(korean_prompt)
+            response = self.chat_engine.chat(system_prompt)
             response_text = str(response)
             
             # 세션 히스토리에 추가

@@ -389,4 +389,19 @@ public class PostServiceImpl implements PostService {
         
         return pageResponse;
     }
+
+    @Override
+    @Transactional
+    public void deletePostAsAdmin(Long id) {
+        log.info("Admin deleting post with id: {}", id);
+
+        Post post = postRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        // 소프트 삭제 처리
+        post.delete();
+        postRepository.save(post);
+
+        log.info("Post deleted by admin: {}", id);
+    }
 }

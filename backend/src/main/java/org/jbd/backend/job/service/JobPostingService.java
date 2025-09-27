@@ -368,6 +368,19 @@ public class JobPostingService {
     }
 
     /**
+     * 관리자용 - 모든 채용공고 조회 (페이징)
+     */
+    @Transactional(readOnly = true)
+    public Page<JobPostingResponseDto> getAllJobPostings(Pageable pageable) {
+        log.info("Admin request - get all job postings with pagination");
+
+        Page<JobPosting> result = jobPostingRepository.findAll(pageable);
+
+        // 트랜잭션 내에서 DTO 변환
+        return result.map(JobPostingResponseDto::from);
+    }
+
+    /**
      * JobPosting을 JobPostingStatsDto로 변환
      */
     private JobPostingStatsDto convertToStatsDto(JobPosting jobPosting) {

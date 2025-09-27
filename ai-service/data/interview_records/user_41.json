@@ -1,0 +1,74 @@
+[
+  {
+    "interviewId": 1758799985,
+    "overallScore": 92,
+    "totalQuestions": 2,
+    "answeredQuestions": 2,
+    "completedAt": "2025-09-25T20:33:05.771695",
+    "jobRole": "프론트엔드 개발자",
+    "questions": [
+      {
+        "id": "1",
+        "question": "자기소개를 해주세요",
+        "type": "personality"
+      },
+      {
+        "id": "2",
+        "question": "Python 경험에 대해 말씀해주세요",
+        "type": "technical"
+      }
+    ],
+    "answers": [
+      {
+        "questionId": "1",
+        "answer": "안녕하세요. 저는 개발자입니다.",
+        "feedback": {
+          "score": 92
+        }
+      },
+      {
+        "questionId": "2",
+        "answer": "Python을 2년간 사용했습니다.",
+        "feedback": {
+          "score": 97
+        }
+      }
+    ]
+  },
+  {
+    "interviewId": 1758799985,
+    "overallScore": 70,
+    "totalQuestions": 2,
+    "answeredQuestions": 2,
+    "completedAt": "2025-09-25T20:33:05.772552",
+    "jobRole": "DevOps 엔지니어",
+    "questions": [
+      {
+        "id": "1",
+        "question": "자기소개를 해주세요",
+        "type": "personality"
+      },
+      {
+        "id": "2",
+        "question": "Python 경험에 대해 말씀해주세요",
+        "type": "technical"
+      }
+    ],
+    "answers": [
+      {
+        "questionId": "1",
+        "answer": "안녕하세요. 저는 개발자입니다.",
+        "feedback": {
+          "score": 70
+        }
+      },
+      {
+        "questionId": "2",
+        "answer": "Python을 2년간 사용했습니다.",
+        "feedback": {
+          "score": 75
+        }
+      }
+    ]
+  }
+]

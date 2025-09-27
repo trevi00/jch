@@ -29,7 +29,9 @@ public class UserResponseDto {
     private String profileImageUrl;
     private LocalDateTime lastLoginAt;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime adminConvertedAt;
+    private Boolean isActive;
     
     public UserResponseDto() {}
     
@@ -158,25 +160,80 @@ public class UserResponseDto {
     public LocalDateTime getAdminConvertedAt() {
         return adminConvertedAt;
     }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public Boolean isActive() {
+        return isActive;
+    }
+
+    public Boolean isEmailVerified() {
+        return emailVerified;
+    }
+
+    public Boolean isCompanyEmailVerified() {
+        return companyEmailVerified;
+    }
     
     public static class Builder {
         private UserResponseDto dto = new UserResponseDto();
-        
+
         public Builder id(Long id) {
             dto.id = id;
             return this;
         }
-        
+
         public Builder email(String email) {
             dto.email = email;
             return this;
         }
-        
+
         public Builder name(String name) {
             dto.name = name;
             return this;
         }
-        
+
+        public Builder userType(UserType userType) {
+            dto.userType = userType;
+            return this;
+        }
+
+        public Builder isActive(Boolean isActive) {
+            dto.isActive = isActive;
+            return this;
+        }
+
+        public Builder emailVerified(Boolean emailVerified) {
+            dto.emailVerified = emailVerified;
+            return this;
+        }
+
+        public Builder companyEmailVerified(Boolean companyEmailVerified) {
+            dto.companyEmailVerified = companyEmailVerified;
+            return this;
+        }
+
+        public Builder lastLoginAt(LocalDateTime lastLoginAt) {
+            dto.lastLoginAt = lastLoginAt;
+            return this;
+        }
+
+        public Builder createdAt(LocalDateTime createdAt) {
+            dto.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder updatedAt(LocalDateTime updatedAt) {
+            dto.updatedAt = updatedAt;
+            return this;
+        }
+
         public UserResponseDto build() {
             return dto;
         }

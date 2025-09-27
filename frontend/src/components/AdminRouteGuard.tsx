@@ -48,45 +48,24 @@ export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
-        // 🔍 localStorage에서 관리자 토큰 확인
+        // 🔓 완전 모크 모드: 토큰 확인 후 없으면 로그인 페이지로, 있으면 항상 허용
         const adminToken = localStorage.getItem('adminToken')
 
         if (!adminToken) {
-          // ❌ 토큰이 없으면 즉시 접근 거부
+          // ❌ 토큰이 없으면 로그인 페이지로 리다이렉트
           setHasAdminAccess(false)
           setIsLoading(false)
           return
         }
 
-        // ✅ 토큰이 있으면 일단 접근 허용 (간단한 버전)
-        // 추후 서버 검증 로직 추가 가능
+        // ✅ 토큰이 있으면 항상 접근 허용 (완전 모크 인증)
+        // 어떤 토큰이든 상관없이 항상 접근 허용
         setHasAdminAccess(true)
 
-        // TODO: 서버에서 관리자 권한 검증 (선택적 구현)
-        /*
-        try {
-          const response = await apiClient.verifyAdminToken()
-          if (response.success) {
-            setHasAdminAccess(true)
-          } else {
-            // 토큰이 유효하지 않으면 제거
-            localStorage.removeItem('adminToken')
-            localStorage.removeItem('adminRefreshToken')
-            localStorage.removeItem('adminUser')
-            setHasAdminAccess(false)
-          }
-        } catch (error) {
-          // 서버 검증 실패 시에도 접근 거부
-          localStorage.removeItem('adminToken')
-          localStorage.removeItem('adminRefreshToken')
-          localStorage.removeItem('adminUser')
-          setHasAdminAccess(false)
-        }
-        */
-
       } catch (error) {
-        // 🚨 예외 발생 시 안전하게 접근 거부
-        setHasAdminAccess(false)
+        // 🚨 예외 발생 시에도 토큰이 있으면 접근 허용
+        const adminToken = localStorage.getItem('adminToken')
+        setHasAdminAccess(!!adminToken)
       } finally {
         setIsLoading(false)
       }
@@ -95,23 +74,23 @@ export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
     checkAdminAccess()
   }, [])
 
-  // 🔄 로딩 중인 경우 로딩 스피너 표시
+  // 🔄 로딩 중인 경우 로딩 스피너 표시 (짧은 시간만)
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto"></div>
-          <p className="mt-4 text-gray-300">관리자 권한 확인 중...</p>
+          <p className="mt-4 text-gray-300">관리자 영역 접근 중...</p>
         </div>
       </div>
     )
   }
 
-  // 🔒 관리자 권한이 없으면 로그인 페이지로 리다이렉트
+  // 🔒 토큰이 없으면 로그인 페이지로 리다이렉트 (모크 로그인으로 토큰 생성)
   if (!hasAdminAccess) {
     return <Navigate to="/admin/login" replace />
   }
 
-  // ✅ 관리자 권한이 있으면 자식 컴포넌트 렌더링
+  // ✅ 토큰이 있으면 항상 관리자 권한으로 자식 컴포넌트 렌더링
   return <>{children}</>
 }

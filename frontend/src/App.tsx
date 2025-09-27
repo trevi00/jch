@@ -83,6 +83,7 @@ import JobManagement from '@/pages/admin/JobManagement'
 import CommunityManagement from '@/pages/admin/CommunityManagement'
 import CertificateManagement from '@/pages/admin/CertificateManagement'
 import AdminLogin from '@/pages/admin/AdminLogin'
+import AdminPromote from '@/pages/admin/AdminPromote'
 
 // 상태 관리 훅
 import { useAuthStore } from '@/hooks/useAuthStore'
@@ -139,6 +140,7 @@ function App() {
         <Route path="jobs" element={<JobManagement />} />
         <Route path="community" element={<CommunityManagement />} />
         <Route path="certificates" element={<CertificateManagement />} />
+        <Route path="promote" element={<AdminPromote />} />
         <Route index element={<AdminDashboard />} />
       </Route>
 

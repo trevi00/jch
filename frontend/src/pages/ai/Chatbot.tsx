@@ -102,6 +102,24 @@ export default function Chatbot() {
     refetchOnWindowFocus: false,
   })
 
+  // Helper function to decode HTML entities and clean response text
+  const decodeResponse = (text: string): string => {
+    // Create a temporary div element to decode HTML entities
+    const div = document.createElement('div')
+    div.innerHTML = text
+    let decoded = div.textContent || div.innerText || ''
+
+    // Handle Unicode escape sequences
+    decoded = decoded.replace(/\\u([0-9a-fA-F]{4})/g, (match, code) => {
+      return String.fromCharCode(parseInt(code, 16))
+    })
+
+    // Clean up any remaining HTML tags
+    decoded = decoded.replace(/<[^>]*>/g, '')
+
+    return decoded.trim()
+  }
+
   const sendMessageMutation = useMutation({
     mutationFn: (message: string) => aiClient.sendChatMessage('user_' + Date.now(), message),
     onSuccess: (response) => {
@@ -109,7 +127,7 @@ export default function Chatbot() {
         const botMessage: Message = {
           id: Date.now().toString() + '_bot',
           type: 'bot',
-          content: response.data.response,
+          content: decodeResponse(response.data.response),
           timestamp: new Date()
         }
         setMessages(prev => [...prev, botMessage])

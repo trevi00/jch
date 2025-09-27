@@ -34,4 +34,7 @@ public interface PostService {
     PostDto.PageResponse getPostsBySentimentScore(Double minScore, Double maxScore, Pageable pageable);
     
     PostDto.PageResponse getPostsWithImages(Pageable pageable);
+
+    // ===== 관리자용 메서드 =====
+    void deletePostAsAdmin(Long id);
 }

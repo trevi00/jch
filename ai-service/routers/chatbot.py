@@ -15,6 +15,7 @@ router = APIRouter()
 class ChatRequest(BaseModel):
     user_id: str
     message: str
+    language: Optional[str] = "ko"
 
 class ChatResponse(BaseModel):
     user_id: str
@@ -54,8 +55,9 @@ async def chat_with_bot(request: ChatRequest):
         clean_user_id = user_id_validation["sanitized"]
         clean_message = message_validation["sanitized"]
         
-        # 챗봇 서비스 호출
-        result = await chatbot_service.chat(clean_user_id, clean_message)
+        # 챗봇 서비스 호출 (language 파라미터 전달)
+        language = getattr(request, 'language', 'ko')
+        result = await chatbot_service.chat(clean_user_id, clean_message, language)
         
         if result["success"]:
             # 응답 데이터도 sanitize

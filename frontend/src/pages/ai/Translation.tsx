@@ -26,6 +26,19 @@ interface TranslationResult {
   }
 }
 
+const LANGUAGE_NAMES: Record<string, string> = {
+  ko: '한국어',
+  en: '영어',
+  ja: '일본어',
+  zh: '중국어',
+  es: '스페인어',
+  fr: '프랑스어',
+  de: '독일어',
+  it: '이탈리아어',
+  pt: '포르투갈어',
+  ru: '러시아어'
+}
+
 export default function Translation() {
   const [sourceText, setSourceText] = useState('')
   const [targetLanguage, setTargetLanguage] = useState('en')
@@ -192,8 +205,7 @@ export default function Translation() {
   }
 
   const getLanguageName = (code: string) => {
-    const language = languagesData?.data?.languages.find((lang: any) => lang.code === code)
-    return language?.name || code
+    return LANGUAGE_NAMES[code] || code
   }
 
   // Translation type labels for future use
@@ -235,9 +247,9 @@ export default function Translation() {
                     onChange={(e) => setSourceLanguage(e.target.value)}
                     className="input"
                   >
-                    {languagesData?.data?.languages.map((lang: any) => (
-                      <option key={lang.code} value={lang.code}>
-                        {lang.name}
+                    {languagesData?.languages?.map((langCode: string) => (
+                      <option key={langCode} value={langCode}>
+                        {getLanguageName(langCode)}
                       </option>
                     ))}
                   </select>
@@ -265,9 +277,9 @@ export default function Translation() {
                     onChange={(e) => setTargetLanguage(e.target.value)}
                     className="input"
                   >
-                    {languagesData?.data?.languages.map((lang: any) => (
-                      <option key={lang.code} value={lang.code}>
-                        {lang.name}
+                    {languagesData?.languages?.map((langCode: string) => (
+                      <option key={langCode} value={langCode}>
+                        {getLanguageName(langCode)}
                       </option>
                     ))}
                   </select>
@@ -641,10 +653,10 @@ export default function Translation() {
               </div>
               <div className="card-content">
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  {languagesData.data.languages.map((lang: any) => (
-                    <div key={lang.code} className="flex items-center space-x-2">
-                      <span className="w-6 text-center">{lang.flag}</span>
-                      <span>{lang.name}</span>
+                  {languagesData?.languages?.map((langCode: string) => (
+                    <div key={langCode} className="flex items-center space-x-2">
+                      <span className="w-6 text-center">🌐</span>
+                      <span>{getLanguageName(langCode)}</span>
                     </div>
                   ))}
                 </div>

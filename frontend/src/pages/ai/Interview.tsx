@@ -51,7 +51,7 @@ export default function Interview() {
   const generateQuestionsMutation = useMutation({
     mutationFn: async (data: { category: string; experienceLevel: string; interviewType: 'technical' | 'personality'; jobRole: string }) => {
       const aiApi = axios.create({
-        baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+        baseURL: AI_SERVICE_BASE_URL,
         timeout: 30000,
       });
       const response = await aiApi.post('/interview/category/generate-questions', {
@@ -82,7 +82,7 @@ export default function Interview() {
   const evaluateAnswerMutation = useMutation({
     mutationFn: async (data: { question: string; answer: string; jobRole: string }) => {
       const aiApi = axios.create({
-        baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+        baseURL: AI_SERVICE_BASE_URL,
         timeout: 30000,
       });
       const response = await aiApi.post('/interview/category/evaluate-answer', {
@@ -123,7 +123,7 @@ export default function Interview() {
       answers: Array<{ questionId: string; answer: string; feedback: any }>
     }) => {
       return aiClient.completeInterview({
-        job_role: data.jobRole,
+        jobRole: data.jobRole,
         questions: data.questions.map((q, index) => ({
           id: `question_${index + 1}`,
           question: q.question,

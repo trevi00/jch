@@ -138,8 +138,8 @@ class ApiClient {
    * - 리다이렉트 제한
    */
   constructor() {
-    this.baseURL = API_BASE_URL.replace('/api', '');
-    this.aiServiceURL = `${AI_SERVICE_BASE_URL}/v1`;
+    this.baseURL = API_BASE_URL;
+    this.aiServiceURL = AI_SERVICE_BASE_URL;
 
     // 성능 최적화된 axios 인스턴스 생성
     this.api = axios.create({
@@ -1075,8 +1075,9 @@ class ApiClient {
   // ============= AI Service APIs =============
 
   async chatWithBot(request: ChatbotRequest): Promise<ChatbotResponse> {
+    // Use nginx routing path instead of direct AI service path
     const aiApi = axios.create({
-      baseURL: this.aiServiceURL,
+      baseURL: API_BASE_URL,
       timeout: 30000,
     });
 
@@ -1086,18 +1087,19 @@ class ApiClient {
       message: request.message
     };
 
-    const response = await aiApi.post('/simple/simple-chat', {
+    const response = await aiApi.post('/api/chatbot/chat', {
       message: request.message,
-      user_id: request.userId
+      user_id: request.userId,
+      language: 'ko'
     });
     
-    // simple-chat API 응답을 ChatbotResponse 형태로 변환
+    // chatbot API 응답을 ChatbotResponse 형태로 변환
     if (response.data.success) {
       return {
         success: true,
         message: response.data.message,
         data: {
-          response: response.data.data.bot_response // bot_response를 response로 매핑
+          response: response.data.data.response // API 응답의 response 필드 매핑
         }
       };
     } else {
@@ -1219,7 +1221,7 @@ class ApiClient {
         baseURL: this.aiServiceURL,
         timeout: 5000,
       });
-      await aiApi.get('/health');
+      await aiApi.get('/api/health');
       return true;
     } catch {
       return false;
@@ -1245,10 +1247,10 @@ export const aiClient = {
   generateInterviewQuestions: apiClient.generateInterviewQuestions.bind(apiClient),
   evaluateInterviewAnswer: async (data: any) => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 30000,
     });
-    const response = await aiApi.post('/interview/evaluate-answer-frontend', data);
+    const response = await aiApi.post('/api/interview/evaluate-answer-frontend', data);
     return response.data;
   },
   completeInterview: async (data: any) => {
@@ -1288,14 +1290,14 @@ export const aiClient = {
       console.error('Backend interview complete failed, fallback to AI service:', error);
       // Fallback to AI service if backend fails
       const aiApi = axios.create({
-        baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+        baseURL: AI_SERVICE_BASE_URL,
         timeout: 60000,
       });
-      const response = await aiApi.post('/interview/complete', {
-        jobRole: data.jobRole || data.job_role,
+      const response = await aiApi.post('/api/interview/complete', {
+        jobRole: data.jobRole,
         questions: data.questions,
         answers: data.answers,
-        user_id: data.userId || 'authenticated_user'
+        userId: data.userId || 'authenticated_user'
       });
       return response.data;
     }
@@ -1407,7 +1409,7 @@ export const aiClient = {
       console.error('Backend interview history fetch failed, fallback to AI service:', error);
       // Fallback to AI service if backend fails
       const aiApi = axios.create({
-        baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+        baseURL: AI_SERVICE_BASE_URL,
         timeout: 30000,
       });
       const response = await aiApi.get(`/interview/history?user_id=${userId}`);
@@ -1416,7 +1418,7 @@ export const aiClient = {
   },
   getAIReview: async (interviewId: number, userId?: string) => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 60000, // AI 분석은 시간이 오래 걸릴 수 있음
     });
 
@@ -1445,7 +1447,7 @@ export const aiClient = {
   },
   generateCoverLetterSection: async (data: any) => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 30000,
     });
     // Use the demo endpoint with query parameters for basic generation
@@ -1468,42 +1470,30 @@ export const aiClient = {
   },
   getCoverLetterFeedback: async (data: any) => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 30000,
     });
-    const response = await aiApi.post('/cover-letter/feedback', data);
+    const response = await aiApi.post('/api/cover-letter/feedback', data);
     return response.data;
   },
   translateText: apiClient.translateText.bind(apiClient),
   getSupportedLanguages: async () => {
-    const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
-      timeout: 30000,
-    });
-    const response = await aiApi.get('/translation/supported-languages');
+    const response = await apiClient.api.get('/api/translation/languages');
     return response.data;
   },
   evaluateTranslation: async (data: any) => {
-    const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
-      timeout: 30000,
-    });
-    const response = await aiApi.post('/translation/evaluate', data);
+    const response = await apiClient.api.post('/api/translation/evaluate', data);
     return response.data;
   },
   batchTranslate: async (data: any) => {
-    const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
-      timeout: 60000,
-    });
-    const response = await aiApi.post('/translation/batch', data);
+    const response = await apiClient.api.post('/api/translation/batch', data);
     return response.data;
   },
   
   // 인터랙티브 자소서 생성 API
   startInteractiveCoverLetter: async (data: { companyName: string; position: string; section: string }) => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 30000,
     });
     // Use query parameters as expected by the backend
@@ -1519,7 +1509,7 @@ export const aiClient = {
   
   submitInteractiveAnswer: async (data: { sessionId: string; answer: string; selections?: string[] }) => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 120000, // 2분으로 증가 (최종 자소서 생성 시간 고려)
     });
     // Use query parameters as expected by the backend
@@ -1539,10 +1529,10 @@ export const aiClient = {
   
   getInteractiveSections: async () => {
     const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
+      baseURL: AI_SERVICE_BASE_URL,
       timeout: 30000,
     });
-    const response = await aiApi.get('/cover-letter/interactive/sections');
+    const response = await aiApi.get('/api/cover-letter/interactive/sections');
     return response.data;
   },
 
@@ -1551,27 +1541,16 @@ export const aiClient = {
   },
 
   getChatbotSuggestions: async () => {
-    const aiApi = axios.create({
-      baseURL: `${AI_SERVICE_BASE_URL}/v1`,
-      timeout: 30000,
-    });
-    const response = await aiApi.get('/chatbot/suggestions');
+    const response = await apiClient.api.get('/api/chatbot/suggestions');
     return response.data;
   },
 
   getChatbotCategories: async (): Promise<ChatbotCategoriesResponse> => {
-    const aiServiceURL = `${AI_SERVICE_BASE_URL}/v1`;
     console.log('🚀 API Client: Starting getChatbotCategories request')
-    console.log('🔗 AI Service URL:', aiServiceURL)
-
-    const aiApi = axios.create({
-      baseURL: aiServiceURL,
-      timeout: 30000,
-    });
 
     try {
-      console.log('📞 Making request to:', `${aiServiceURL}/chatbot/categories`)
-      const response = await aiApi.get('/chatbot/categories');
+      console.log('📞 Making request to: /api/chatbot/categories')
+      const response = await apiClient.api.get('/api/chatbot/categories');
       console.log('📥 Raw API response:', response.data)
 
       // Transform the API response to match our expected format

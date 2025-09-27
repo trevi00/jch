@@ -366,23 +366,4 @@ public class AdminController {
         }
     }
 
-    // ===== 사용자 계정 관리 (관리자용) =====
-    @DeleteMapping("/users/{userId}")
-    public ResponseEntity<ApiResponse<Void>> deleteUserAccount(
-            @PathVariable Long userId,
-            @RequestHeader(value = "Authorization", required = false) String authorization) {
-
-        log.info("Admin delete user account request for userId: {}", userId);
-
-        try {
-            userService.deleteUser(userId);
-            return ResponseEntity.ok(
-                ApiResponse.success("사용자 계정이 삭제되었습니다.")
-            );
-        } catch (Exception e) {
-            log.error("Delete user account failed: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                .body(ApiResponse.error("사용자 계정 삭제에 실패했습니다."));
-        }
-    }
 }

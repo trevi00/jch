@@ -23,10 +23,11 @@ export default function Certificates() {
     try {
       const certificateTypeMap: { [key: string]: string } = {
         'enrollment': 'ENROLLMENT_CERTIFICATE',
-        'transcript': 'TRANSCRIPT', 
+        'transcript': 'TRANSCRIPT',
         'completion': 'COMPLETION_CERTIFICATE',
         'course': 'COURSE_COMPLETION_CERTIFICATE',
-        'attendance': 'ATTENDANCE_CERTIFICATE'
+        'attendance': 'ATTENDANCE_CERTIFICATE',
+        'vacation': 'VACATION_REQUEST'
       }
 
       await apiClient.createCertificateRequest({
@@ -111,6 +112,7 @@ export default function Certificates() {
               <option value="completion">수료증</option>
               <option value="course">이수증명서</option>
               <option value="attendance">출석증명서</option>
+              <option value="vacation">휴가신청서</option>
             </select>
           </div>
           

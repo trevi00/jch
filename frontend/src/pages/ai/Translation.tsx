@@ -247,9 +247,9 @@ export default function Translation() {
                     onChange={(e) => setSourceLanguage(e.target.value)}
                     className="input"
                   >
-                    {languagesData?.languages?.map((langCode: string) => (
-                      <option key={langCode} value={langCode}>
-                        {getLanguageName(langCode)}
+                    {languagesData?.data?.languages?.map((lang: any) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.name}
                       </option>
                     ))}
                   </select>
@@ -277,9 +277,9 @@ export default function Translation() {
                     onChange={(e) => setTargetLanguage(e.target.value)}
                     className="input"
                   >
-                    {languagesData?.languages?.map((langCode: string) => (
-                      <option key={langCode} value={langCode}>
-                        {getLanguageName(langCode)}
+                    {languagesData?.data?.languages?.map((lang: any) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.name}
                       </option>
                     ))}
                   </select>
@@ -653,10 +653,10 @@ export default function Translation() {
               </div>
               <div className="card-content">
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  {languagesData?.languages?.map((langCode: string) => (
-                    <div key={langCode} className="flex items-center space-x-2">
+                  {languagesData?.data?.languages?.map((lang: any) => (
+                    <div key={lang.code} className="flex items-center space-x-2">
                       <span className="w-6 text-center">🌐</span>
-                      <span>{getLanguageName(langCode)}</span>
+                      <span>{lang.name}</span>
                     </div>
                   ))}
                 </div>

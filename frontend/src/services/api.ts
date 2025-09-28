@@ -1133,7 +1133,7 @@ class ApiClient {
 
   async translateText(request: TranslationRequest): Promise<TranslationResponse> {
     const aiApi = axios.create({
-      baseURL: this.aiServiceURL,
+      baseURL: API_BASE_URL,
       timeout: 30000,
     });
 
@@ -1478,7 +1478,11 @@ export const aiClient = {
   },
   translateText: apiClient.translateText.bind(apiClient),
   getSupportedLanguages: async () => {
-    const response = await apiClient.api.get('/api/translation/languages');
+    const aiApi = axios.create({
+      baseURL: API_BASE_URL,
+      timeout: 30000,
+    });
+    const response = await aiApi.get('/translation/supported-languages');
     return response.data;
   },
   evaluateTranslation: async (data: any) => {

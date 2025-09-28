@@ -350,21 +350,29 @@ const userApplication = applicationData?.data?.content?.find(
           )}
 
           {/* 필요 기술 */}
-          {job.requiredSkills && job.requiredSkills.length > 0 && (
+          {job.requiredSkills && (
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
               <div className="px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold">필요 기술</h3>
               </div>
               <div className="p-6">
                 <div className="flex flex-wrap gap-2">
-                  {job.requiredSkills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {(() => {
+                    const skills = typeof job.requiredSkills === 'string'
+                      ? job.requiredSkills.split(',').map(s => s.trim())
+                      : Array.isArray(job.requiredSkills)
+                        ? job.requiredSkills
+                        : [];
+
+                    return skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ));
+                  })()}
                 </div>
               </div>
             </div>

@@ -48,24 +48,48 @@ export default function AdminRouteGuard({ children }: AdminRouteGuardProps) {
   useEffect(() => {
     const checkAdminAccess = async () => {
       try {
-        // 🔓 완전 모크 모드: 토큰 확인 후 없으면 로그인 페이지로, 있으면 항상 허용
         const adminToken = localStorage.getItem('adminToken')
+        console.log('AdminRouteGuard: Checking admin access, token:', adminToken)
 
         if (!adminToken) {
           // ❌ 토큰이 없으면 로그인 페이지로 리다이렉트
+          console.log('AdminRouteGuard: No token found, redirecting to login')
           setHasAdminAccess(false)
           setIsLoading(false)
           return
         }
 
-        // ✅ 토큰이 있으면 항상 접근 허용 (완전 모크 인증)
-        // 어떤 토큰이든 상관없이 항상 접근 허용
-        setHasAdminAccess(true)
+        console.log('AdminRouteGuard: Verifying token with backend...')
+
+        // 🔍 백엔드 API를 통한 토큰 검증
+        const response = await apiClient.api.get('/api/admin/verify', {
+          headers: {
+            Authorization: `Bearer ${adminToken}`
+          }
+        })
+
+        console.log('AdminRouteGuard: Verification response:', response.data)
+
+        if (response.data.success && response.data.data.admin) {
+          // ✅ 관리자 권한 확인됨
+          console.log('AdminRouteGuard: Admin access granted')
+          setHasAdminAccess(true)
+        } else {
+          // ❌ 관리자 권한 없음
+          console.log('AdminRouteGuard: Admin access denied:', response.data)
+          localStorage.removeItem('adminToken')
+          localStorage.removeItem('adminRefreshToken')
+          localStorage.removeItem('adminUser')
+          setHasAdminAccess(false)
+        }
 
       } catch (error) {
-        // 🚨 예외 발생 시에도 토큰이 있으면 접근 허용
-        const adminToken = localStorage.getItem('adminToken')
-        setHasAdminAccess(!!adminToken)
+        console.error('AdminRouteGuard: Admin verification failed:', error)
+        // 🚨 검증 실패 시 토큰 제거
+        localStorage.removeItem('adminToken')
+        localStorage.removeItem('adminRefreshToken')
+        localStorage.removeItem('adminUser')
+        setHasAdminAccess(false)
       } finally {
         setIsLoading(false)
       }

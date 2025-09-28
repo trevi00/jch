@@ -42,11 +42,34 @@ public class AdminController {
         return ResponseEntity.ok("Admin Controller is working!");
     }
 
+    @GetMapping("/login")
+    public ResponseEntity<ApiResponse<Map<String, String>>> getLoginPage() {
+        log.info("Admin login page request");
+
+        Map<String, String> loginInfo = new HashMap<>();
+        loginInfo.put("message", "관리자 로그인 페이지");
+        loginInfo.put("loginUrl", "/admin/login");
+        loginInfo.put("method", "POST");
+
+        return ResponseEntity.ok(
+            ApiResponse.success("관리자 로그인 페이지", loginInfo)
+        );
+    }
+
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AdminLoginResponse>> login(
             @Valid @RequestBody AdminLoginRequest request) {
 
-        log.info("Mock admin login for email: {}", request.getEmail());
+        log.info("Admin login attempt for email: {}", request.getEmail());
+
+        // 관리자 인증 확인
+        if (!"admin@jbd.com".equals(request.getEmail()) ||
+            !"djemals321@".equals(request.getPassword())) {
+
+            log.warn("Invalid admin credentials for email: {}", request.getEmail());
+            return ResponseEntity.badRequest()
+                .body(ApiResponse.error("관리자 인증에 실패했습니다."));
+        }
 
         // 모크 관리자 사용자 정보 생성
         AdminUserInfo user = AdminUserInfo.builder()

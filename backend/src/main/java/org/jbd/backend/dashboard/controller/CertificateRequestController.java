@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/certificates")
+@RequestMapping("/certificates")
 @RequiredArgsConstructor
 public class CertificateRequestController {
 
@@ -28,9 +28,14 @@ public class CertificateRequestController {
 
     @PostMapping("/request")
     public ResponseEntity<ApiResponse<CertificateRequestDto.ResponseDto>> requestCertificate(
-            @RequestHeader("Authorization") String token,
+            @RequestHeader(value = "Authorization", required = false) String token,
             @Valid @RequestBody CertificateRequestDto.CreateDto dto) {
         try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                return ResponseEntity.status(401)
+                        .body(ApiResponse.error("인증이 필요합니다"));
+            }
+
             Long userId = jwtService.extractUserId(token.substring(7));
             CertificateRequestDto.ResponseDto response = certificateRequestService.requestCertificate(userId, dto);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -43,8 +48,13 @@ public class CertificateRequestController {
 
     @GetMapping("/my-requests")
     public ResponseEntity<ApiResponse<List<CertificateRequestDto.ResponseDto>>> getMyRequests(
-            @RequestHeader("Authorization") String token) {
+            @RequestHeader(value = "Authorization", required = false) String token) {
         try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                return ResponseEntity.status(401)
+                        .body(ApiResponse.error("인증이 필요합니다"));
+            }
+
             Long userId = jwtService.extractUserId(token.substring(7));
             List<CertificateRequestDto.ResponseDto> requests = certificateRequestService.getUserRequests(userId);
             return ResponseEntity.ok(ApiResponse.success("내 증명서 요청 목록 조회 성공", requests));

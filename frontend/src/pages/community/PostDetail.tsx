@@ -279,8 +279,8 @@ export default function PostDetail() {
 
           {post.imageUrl && (
             <div className="mb-6">
-              <img 
-                src={post.imageUrl.startsWith('/') ? `http://localhost:8001${post.imageUrl}` : post.imageUrl} 
+              <img
+                src={post.imageUrl.startsWith('/') ? `/ai${post.imageUrl}` : post.imageUrl}
                 alt={`${post.title} 이미지`}
                 className="w-full max-w-2xl mx-auto rounded-lg shadow-md"
                 onError={(e) => {

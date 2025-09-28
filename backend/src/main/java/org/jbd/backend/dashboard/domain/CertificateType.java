@@ -5,7 +5,8 @@ public enum CertificateType {
     ENROLLMENT_CERTIFICATE("재학증명서"),
     COURSE_COMPLETION_CERTIFICATE("이수증명서"),
     TRANSCRIPT("성적증명서"),
-    ATTENDANCE_CERTIFICATE("출석증명서");
+    ATTENDANCE_CERTIFICATE("출석증명서"),
+    VACATION_REQUEST("휴가신청서");
 
     private final String description;
 

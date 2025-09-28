@@ -84,6 +84,7 @@ import CommunityManagement from '@/pages/admin/CommunityManagement'
 import CertificateManagement from '@/pages/admin/CertificateManagement'
 import AdminLogin from '@/pages/admin/AdminLogin'
 import AdminPromote from '@/pages/admin/AdminPromote'
+import TestAdmin from '@/pages/admin/TestAdmin'
 
 // 상태 관리 훅
 import { useAuthStore } from '@/hooks/useAuthStore'
@@ -131,18 +132,21 @@ function App() {
         AdminRouteGuard를 통한 이중 보안 검증
       */}
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/test" element={<TestAdmin />} />
       <Route path="/admin/*" element={
         <AdminRouteGuard>
-          <AdminLayout />
+          <Routes>
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="jobs" element={<JobManagement />} />
+              <Route path="community" element={<CommunityManagement />} />
+              <Route path="certificates" element={<CertificateManagement />} />
+              <Route path="promote" element={<AdminPromote />} />
+            </Route>
+          </Routes>
         </AdminRouteGuard>
-      }>
-        <Route path="users" element={<UserManagement />} />
-        <Route path="jobs" element={<JobManagement />} />
-        <Route path="community" element={<CommunityManagement />} />
-        <Route path="certificates" element={<CertificateManagement />} />
-        <Route path="promote" element={<AdminPromote />} />
-        <Route index element={<AdminDashboard />} />
-      </Route>
+      } />
 
       {/*
         🔐 PROTECTED USER ROUTES (인증 필요)

@@ -65,8 +65,15 @@ export default function CommunityManagement() {
   // Check admin authentication
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken')
-    const isAdminStatus = localStorage.getItem('isAdmin')
-    setIsAdmin(adminToken && isAdminStatus === 'true')
+    const adminUserData = localStorage.getItem('adminUser')
+
+    try {
+      const adminUser = adminUserData ? JSON.parse(adminUserData) : null
+      setIsAdmin(adminToken && adminUser && adminUser.admin === true)
+    } catch (error) {
+      console.error('Error parsing admin user data:', error)
+      setIsAdmin(false)
+    }
   }, [])
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<'posts' | 'categories'>('posts')
@@ -570,7 +577,7 @@ export default function CommunityManagement() {
                 {selectedPost.imageUrl && (
                   <div>
                     <img 
-                      src={selectedPost.imageUrl.startsWith('/') ? `http://localhost:8001${selectedPost.imageUrl}` : selectedPost.imageUrl} 
+                      src={selectedPost.imageUrl.startsWith('/') ? `/ai${selectedPost.imageUrl}` : selectedPost.imageUrl} 
                       alt="게시글 이미지"
                       className="w-full max-w-md mx-auto rounded-lg"
                       onError={(e) => {

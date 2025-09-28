@@ -67,6 +67,7 @@ type AdminLoginForm = z.infer<typeof adminLoginSchema>
  * - showPassword 토글: 비밀번호 가시성 제어
  */
 export default function AdminLogin() {
+  console.log('AdminLogin component is rendering')
   // 🎛️ 컴포넌트 로컬 상태 관리
   const [showPassword, setShowPassword] = useState(false)        // 비밀번호 표시/숨김 토글
   const [isLoading, setIsLoading] = useState(false)              // 로딩 상태 (API 요청 중)
@@ -103,30 +104,43 @@ export default function AdminLogin() {
   const onSubmit = async (data: AdminLoginForm) => {
     setIsLoading(true)                                             // 🔄 로딩 상태 시작
 
-    // 모크 로딩 시간 (0.5초 대기)
-    await new Promise(resolve => setTimeout(resolve, 500))
-
     try {
-      // 🔓 모크 인증: 항상 성공으로 처리
-      // 모크 토큰을 localStorage에 저장
-      localStorage.setItem('adminToken', 'mock-admin-token-12345')
-      localStorage.setItem('adminRefreshToken', 'mock-admin-refresh-token-12345')
+      console.log('Attempting admin login with:', { email: data.email })
 
-      // 모크 관리자 정보 저장
-      const mockAdminUser = {
-        id: 1,
+      // 🔓 백엔드 API를 통한 모크 인증
+      const response = await apiClient.api.post('/api/admin/login', {
         email: data.email,
-        name: '관리자',
-        userType: 'ADMIN',
-        role: 'ADMIN'
-      }
-      localStorage.setItem('adminUser', JSON.stringify(mockAdminUser))
+        password: data.password
+      })
 
-      // 🏠 관리자 대시보드로 이동
-      navigate('/admin')
+      console.log('Login response:', response.data)
+
+      if (response.data.success) {
+        const { user, accessToken, refreshToken } = response.data.data
+
+        console.log('Storing tokens:', { accessToken, user })
+
+        // 토큰과 사용자 정보를 localStorage에 저장
+        localStorage.setItem('adminToken', accessToken)
+        localStorage.setItem('adminRefreshToken', refreshToken)
+        localStorage.setItem('adminUser', JSON.stringify(user))
+
+        console.log('Tokens stored in localStorage:', {
+          adminToken: localStorage.getItem('adminToken'),
+          adminUser: localStorage.getItem('adminUser')
+        })
+
+        // 🏠 관리자 대시보드로 이동
+        navigate('/admin')
+      } else {
+        console.error('Login failed:', response.data)
+        setError('root', { message: response.data.message || '로그인에 실패했습니다' })
+      }
     } catch (error: any) {
-      // 🚨 모크에서는 거의 발생하지 않지만 안전을 위한 예외 처리
-      setError('root', { message: '관리자 로그인 중 오류가 발생했습니다' })
+      console.error('Admin login error:', error)
+      setError('root', {
+        message: error.response?.data?.message || '관리자 로그인 중 오류가 발생했습니다'
+      })
     } finally {
       setIsLoading(false)                                          // ⏹️ 로딩 상태 종료
     }

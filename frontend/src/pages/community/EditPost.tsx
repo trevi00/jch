@@ -177,7 +177,7 @@ export default function EditPost() {
               {imageUrl && (
                 <div className="mt-2">
                   <img
-                    src={imageUrl.startsWith('/') ? `http://localhost:8001${imageUrl}` : imageUrl}
+                    src={imageUrl.startsWith('/') ? `/ai${imageUrl}` : imageUrl}
                     alt="미리보기"
                     className="w-32 h-32 object-cover rounded-lg"
                     onError={(e) => {

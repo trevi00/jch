@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { useAuthStore } from '@/hooks/useAuthStore'
-import { AI_SERVICE_BASE_URL } from '@/utils/constants'
+import { API_BASE_URL } from '@/utils/constants'
 import { aiClient } from '@/services/api'
 
 interface Question {
@@ -51,7 +51,7 @@ export default function Interview() {
   const generateQuestionsMutation = useMutation({
     mutationFn: async (data: { category: string; experienceLevel: string; interviewType: 'technical' | 'personality'; jobRole: string }) => {
       const aiApi = axios.create({
-        baseURL: AI_SERVICE_BASE_URL,
+        baseURL: API_BASE_URL || '',
         timeout: 30000,
       });
       const response = await aiApi.post('/interview/category/generate-questions', {
@@ -82,7 +82,7 @@ export default function Interview() {
   const evaluateAnswerMutation = useMutation({
     mutationFn: async (data: { question: string; answer: string; jobRole: string }) => {
       const aiApi = axios.create({
-        baseURL: AI_SERVICE_BASE_URL,
+        baseURL: API_BASE_URL || '',
         timeout: 30000,
       });
       const response = await aiApi.post('/interview/category/evaluate-answer', {

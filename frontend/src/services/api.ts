@@ -1113,7 +1113,7 @@ class ApiClient {
 
   async generateInterviewQuestions(request: InterviewRequest): Promise<ApiResponse<{ questions: InterviewQuestion[] }>> {
     const aiApi = axios.create({
-      baseURL: this.aiServiceURL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
 
@@ -1123,7 +1123,7 @@ class ApiClient {
 
   async generateCoverLetter(request: CoverLetterRequest): Promise<CoverLetterResponse> {
     const aiApi = axios.create({
-      baseURL: this.aiServiceURL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
 
@@ -1150,8 +1150,9 @@ class ApiClient {
   }
 
   async generateImage(request: ImageGenerationRequest): Promise<ImageGenerationResponse> {
+    // Use nginx proxy path instead of direct AI service URL
     const aiApi = axios.create({
-      baseURL: this.aiServiceURL,
+      baseURL: API_BASE_URL || '',
       timeout: 60000,
     });
 
@@ -1162,6 +1163,7 @@ class ApiClient {
       style: request.style
     };
 
+    // Use nginx /image/ proxy path
     const response = await aiApi.post<ImageGenerationResponse>('/image/generate', backendRequest);
     return response.data;
   }
@@ -1247,10 +1249,10 @@ export const aiClient = {
   generateInterviewQuestions: apiClient.generateInterviewQuestions.bind(apiClient),
   evaluateInterviewAnswer: async (data: any) => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
-    const response = await aiApi.post('/api/interview/evaluate-answer-frontend', data);
+    const response = await aiApi.post('/interview/evaluate-answer-frontend', data);
     return response.data;
   },
   completeInterview: async (data: any) => {
@@ -1290,10 +1292,10 @@ export const aiClient = {
       console.error('Backend interview complete failed, fallback to AI service:', error);
       // Fallback to AI service if backend fails
       const aiApi = axios.create({
-        baseURL: AI_SERVICE_BASE_URL,
+        baseURL: API_BASE_URL || '',
         timeout: 60000,
       });
-      const response = await aiApi.post('/api/interview/complete', {
+      const response = await aiApi.post('/interview/complete', {
         jobRole: data.jobRole,
         questions: data.questions,
         answers: data.answers,
@@ -1409,7 +1411,7 @@ export const aiClient = {
       console.error('Backend interview history fetch failed, fallback to AI service:', error);
       // Fallback to AI service if backend fails
       const aiApi = axios.create({
-        baseURL: AI_SERVICE_BASE_URL,
+        baseURL: API_BASE_URL || '',
         timeout: 30000,
       });
       const response = await aiApi.get(`/interview/history?user_id=${userId}`);
@@ -1418,7 +1420,7 @@ export const aiClient = {
   },
   getAIReview: async (interviewId: number, userId?: string) => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 60000, // AI 분석은 시간이 오래 걸릴 수 있음
     });
 
@@ -1447,7 +1449,7 @@ export const aiClient = {
   },
   generateCoverLetterSection: async (data: any) => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
     // Use the demo endpoint with query parameters for basic generation
@@ -1470,10 +1472,10 @@ export const aiClient = {
   },
   getCoverLetterFeedback: async (data: any) => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
-    const response = await aiApi.post('/api/cover-letter/feedback', data);
+    const response = await aiApi.post('/cover-letter/feedback', data);
     return response.data;
   },
   translateText: apiClient.translateText.bind(apiClient),
@@ -1497,7 +1499,7 @@ export const aiClient = {
   // 인터랙티브 자소서 생성 API
   startInteractiveCoverLetter: async (data: { companyName: string; position: string; section: string }) => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
     // Use query parameters as expected by the backend
@@ -1513,7 +1515,7 @@ export const aiClient = {
   
   submitInteractiveAnswer: async (data: { sessionId: string; answer: string; selections?: string[] }) => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 120000, // 2분으로 증가 (최종 자소서 생성 시간 고려)
     });
     // Use query parameters as expected by the backend
@@ -1533,10 +1535,10 @@ export const aiClient = {
   
   getInteractiveSections: async () => {
     const aiApi = axios.create({
-      baseURL: AI_SERVICE_BASE_URL,
+      baseURL: API_BASE_URL || '',
       timeout: 30000,
     });
-    const response = await aiApi.get('/api/cover-letter/interactive/sections');
+    const response = await aiApi.get('/cover-letter/interactive/sections');
     return response.data;
   },
 

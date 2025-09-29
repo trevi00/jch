@@ -18,6 +18,7 @@ import org.jbd.backend.job.repository.JobApplicationRepository;
 import org.jbd.backend.job.repository.JobPostingRepository;
 import org.jbd.backend.user.domain.*;
 import org.jbd.backend.user.domain.enums.*;
+import org.jbd.backend.user.domain.Education;
 import org.jbd.backend.user.repository.*;
 import org.jbd.backend.user.service.UserService;
 import org.jbd.backend.community.repository.PostRepository;
@@ -178,19 +179,29 @@ public class DashboardService {
         else if (careerCount >= 1) completeness += 12;
         // 경력 없으면 0점 (신입은 포트폴리오로 대체)
 
-        // 교육 정보 - 세분화된 점수
-        long educationCount = educationRepository.countByUserId(user.getId());
-        completeness += educationCount > 0 ? 10 : 0;
+        // 교육 정보 - 학력 수준에 따른 세분화된 점수 (더 높은 비중)
+        List<Education> educations = educationRepository.findByUserIdOrderByGraduationYearDesc(user.getId());
+        if (!educations.isEmpty()) {
+            Education highestEducation = educations.get(0);
+            completeness += switch (highestEducation.getEducationLevel()) {
+                case DOCTORATE -> 25;     // 박사 - 높은 학력 우대
+                case MASTER -> 22;        // 석사
+                case BACHELOR -> 18;      // 학사
+                case ASSOCIATE -> 14;     // 전문학사
+                case HIGH_SCHOOL -> 10;   // 고졸
+                default -> 5;             // 기타
+            };
+        }
 
         // 자격증 정보 - 더 높은 기준
         long certCount = certificationRepository.countByUserId(user.getId());
-        if (certCount >= 3) completeness += 15;
-        else if (certCount >= 1) completeness += 8;
+        if (certCount >= 3) completeness += 10;
+        else if (certCount >= 1) completeness += 5;
 
         // 포트폴리오 정보 - 실제 프로젝트 증명 (신입에게 중요)
         long portfolioCount = portfolioRepository.countByUserId(user.getId());
-        if (portfolioCount >= 3) completeness += 20;
-        else if (portfolioCount >= 1) completeness += 10;
+        if (portfolioCount >= 3) completeness += 15;
+        else if (portfolioCount >= 1) completeness += 8;
 
         return Math.min(completeness, 100);
     }
@@ -265,24 +276,25 @@ public class DashboardService {
     }
 
     private int calculateLearningActivity(User user) {
-        int learningScore = 10; // 더 엄격한 기본 점수
+        int learningScore = 15; // 기본 점수 상향
 
         // 최신 자격증 (최근 2년)
         List<Certification> recentCerts = certificationRepository.findByUserIdOrderByIssueDateDesc(user.getId())
             .stream()
             .filter(cert -> cert.getIssueDate().isAfter(LocalDate.now().minusYears(2)))
             .collect(Collectors.toList());
-        learningScore += Math.min(recentCerts.size() * 10, 40);
+        learningScore += Math.min(recentCerts.size() * 10, 30);
 
-        // 교육 수준
+        // 교육 수준 - 더 높은 비중
         List<Education> educations = educationRepository.findByUserIdOrderByGraduationYearDesc(user.getId());
         if (!educations.isEmpty()) {
             Education highestEducation = educations.get(0);
             learningScore += switch (highestEducation.getEducationLevel()) {
-                case DOCTORATE -> 30;
-                case MASTER -> 25;
-                case BACHELOR -> 20;
-                case ASSOCIATE -> 15;
+                case DOCTORATE -> 45;     // 박사 - 학습 능력 최고 평가
+                case MASTER -> 38;        // 석사
+                case BACHELOR -> 30;      // 학사
+                case ASSOCIATE -> 22;     // 전문학사
+                case HIGH_SCHOOL -> 15;   // 고졸
                 default -> 10;
             };
         }

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   Settings as SettingsIcon,
   Lock,
@@ -8,9 +8,15 @@ import {
   Shield,
   LogOut,
   CreditCard,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  DollarSign,
 } from "lucide-react";
 import { useAuthStore } from "@/hooks/useAuthStore";
 import { apiClient } from "@/services/api";
+import { paymentService } from "@/services/paymentService";
+import { SubscriptionInfo } from "@/types/payment";
 
 export default function Settings() {
   const { user, logout } = useAuthStore();
@@ -81,12 +87,90 @@ export default function Settings() {
     }
   };
 
+  // 학원 소속 확인
+  const handleCheckAcademy = async () => {
+    if (!academyCouponCode) return;
+
+    setIsCheckingAcademy(true);
+    try {
+      const result = await paymentService.checkAcademyEligibility(academyCouponCode);
+      setAcademyCheckResult(result);
+    } catch (error) {
+      alert("학원 소속 확인 중 오류가 발생했습니다.");
+    } finally {
+      setIsCheckingAcademy(false);
+    }
+  };
+
+  // 학원 3개월 무료 구독 신청
+  const handleAcademySubscription = async () => {
+    if (!academyCheckResult?.eligible || !user || !academyCouponCode) return;
+
+    try {
+      const result = await paymentService.createFreeAcademySubscription(academyCouponCode);
+
+      if (result.success) {
+        alert("무료 학원 구독이 성공적으로 활성화되었습니다!");
+        // 구독 정보 새로고침
+        fetchSubscriptionInfo();
+        // 상태 리셋
+        setAcademyCouponCode('');
+        setAcademyCheckResult(null);
+      } else {
+        alert(result.message || "무료 구독 활성화에 실패했습니다.");
+      }
+    } catch (error) {
+      console.error('무료 구독 신청 오류:', error);
+      alert("무료 구독 신청 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 월 1원 정액제 결제
+  const handleMonthlyPayment = async () => {
+    if (!user) return;
+
+    try {
+      const orderId = paymentService.generateOrderId();
+      await paymentService.initiatePayment({
+        amount: 1,
+        itemName: "JCH 월 정액제",
+        orderId,
+        userId: user.id,
+        planType: "PAID_MONTHLY",
+      });
+    } catch (error) {
+      alert("결제 요청 중 오류가 발생했습니다.");
+    }
+  };
+
+  // 구독 취소
+  const cancelSubscriptionMutation = useMutation({
+    mutationFn: (subscriptionId: number) => paymentService.cancelSubscription(subscriptionId),
+    onSuccess: () => {
+      alert("구독이 취소되었습니다.");
+      refetchSubscription();
+    },
+    onError: () => {
+      alert("구독 취소 중 오류가 발생했습니다.");
+    },
+  });
+
+  const [academyCouponCode, setAcademyCouponCode] = useState("");
+  const [isCheckingAcademy, setIsCheckingAcademy] = useState(false);
+  const [academyCheckResult, setAcademyCheckResult] = useState<{eligible: boolean; academyName?: string} | null>(null);
+
+  // 구독 정보 조회
+  const { data: subscription, refetch: refetchSubscription } = useQuery({
+    queryKey: ["subscription"],
+    queryFn: () => paymentService.getCurrentSubscription(),
+  });
+
   const tabs = [
     { id: "profile", label: "프로필", icon: User },
     { id: "security", label: "보안", icon: Shield },
     { id: "notifications", label: "알림", icon: Bell },
     { id: "account", label: "계정", icon: Lock },
-    { id: "credit", label: "요금", icon: CreditCard },
+    { id: "subscription", label: "구독 관리", icon: CreditCard },
   ];
 
   return (
@@ -321,105 +405,149 @@ export default function Settings() {
                   </div>
                 </div>
               )}
-              {activeTab === "credit" && (
+              {activeTab === "subscription" && (
                 <div>
-                  <h2 className="text-lg font-semibold mb-4">카드 등록</h2>
-                  {/* 카드 번호 입력 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      카드 번호
-                    </label>
-                    <div className="flex space-x-2">
-                      <input
-                        type="text"
-                        maxLength={4}
-                        className="input w-16 text-center"
-                        required
-                      />
-                      <input
-                        type="text"
-                        maxLength={4}
-                        className="input w-16 text-center"
-                        required
-                      />
-                      <input
-                        type="text"
-                        maxLength={4}
-                        className="input w-16 text-center"
-                        required
-                      />
-                      <input
-                        type="text"
-                        maxLength={4}
-                        className="input w-16 text-center"
-                        required
-                      />
-                    </div>
-                  </div>
+                  <h2 className="text-lg font-semibold mb-6">구독 관리</h2>
 
-                  {/* 만료일 + CVC */}
-                  <div className="flex flex-wrap sm:flex-nowrap space-x-4">
-                    {/* 만료일 */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        만료일 (MM/YY)
-                      </label>
-                      <div className="flex space-x-2">
-                        <input
-                          type="text"
-                          maxLength={2}
-                          className="input w-14 text-center"
-                          placeholder="MM"
-                          required
-                        />
-                        <span className="mt-2">/</span>
-                        <input
-                          type="text"
-                          maxLength={2}
-                          className="input w-14 text-center"
-                          placeholder="YY"
-                          required
-                        />
+                  {/* 현재 구독 상태 */}
+                  {subscription ? (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                          <div>
+                            <h3 className="font-medium text-green-800">
+                              {subscription.planType === 'FREE_ACADEMY' ? '솔데스크 학원 무료 구독' : '월 정액제'}
+                            </h3>
+                            <p className="text-sm text-green-600">
+                              {new Date(subscription.startDate).toLocaleDateString()} ~ {new Date(subscription.endDate).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-green-800">
+                            {subscription.planType === 'FREE_ACADEMY' ? '무료' : '월 1원'}
+                          </p>
+                          <p className="text-sm text-green-600">
+                            상태: {subscription.status === 'ACTIVE' ? '활성' : '만료'}
+                          </p>
+                        </div>
+                      </div>
+                      {subscription.status === 'ACTIVE' && (
+                        <button
+                          onClick={() => cancelSubscriptionMutation.mutate(subscription.id)}
+                          disabled={cancelSubscriptionMutation.isPending}
+                          className="mt-4 btn-outline text-red-600 border-red-600 hover:bg-red-50"
+                        >
+                          {cancelSubscriptionMutation.isPending ? '취소 중...' : '구독 취소'}
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                      <div className="flex items-center">
+                        <XCircle className="w-5 h-5 text-yellow-600 mr-2" />
+                        <p className="text-yellow-800">현재 활성화된 구독이 없습니다.</p>
                       </div>
                     </div>
+                  )}
+
+                  {/* 솔데스크 학원 무료 구독 */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                    <h3 className="text-lg font-medium text-blue-800 mb-4">
+                      🎓 솔데스크 학원 소속 확인 (3개월 무료)
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          학원 쿠폰 코드
+                        </label>
+                        <div className="flex space-x-2">
+                          <input
+                            type="text"
+                            value={academyCouponCode}
+                            onChange={(e) => setAcademyCouponCode(e.target.value)}
+                            placeholder="soldeskjongro"
+                            className="input flex-1"
+                          />
+                          <button
+                            onClick={handleCheckAcademy}
+                            disabled={isCheckingAcademy || !academyCouponCode}
+                            className="btn-outline px-4"
+                          >
+                            {isCheckingAcademy ? '확인 중...' : '확인'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {academyCheckResult && (
+                        <div className={`p-3 rounded-lg ${
+                          academyCheckResult.eligible
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {academyCheckResult.eligible ? (
+                            <div>
+                              <p className="font-medium">✅ 솔데스크 학원 소속이 확인되었습니다!</p>
+                              <p className="text-sm">학원명: {academyCheckResult.academyName}</p>
+                              <button
+                                onClick={handleAcademySubscription}
+                                className="mt-2 btn-primary"
+                              >
+                                3개월 무료 구독 신청
+                              </button>
+                            </div>
+                          ) : (
+                            <p>❌ 솔데스크 학원 소속을 확인할 수 없습니다.</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {/* CVC */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      CVC
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={4}
-                      className="input w-32 text-center"
-                      placeholder="3자리"
-                      required
-                    />
-                  </div>
-                  {/* 은행 선택 */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      은행 선택
-                    </label>
-                    <select className="input w-full" required>
-                      <option value="">은행을 선택하세요</option>
-                      <option value="shinhan">신한은행</option>
-                      <option value="kb">국민은행</option>
-                      <option value="hana">하나은행</option>
-                      <option value="woori">우리은행</option>
-                      <option value="ibk">IBK기업은행</option>
-                      <option value="kakao">카카오뱅크</option>
-                      <option value="toss">토스뱅크</option>
-                    </select>
-                    
-                  </div>
+                  {/* 월 정액제 */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      💳 월 정액제 (일반 사용자)
+                    </h3>
 
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">JCH 월 정액제</p>
+                          <p className="text-sm text-gray-600">
+                            모든 AI 기능을 제한 없이 이용할 수 있습니다.
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-2xl font-bold text-primary-600">₩1</p>
+                          <p className="text-sm text-gray-600">/ 월</p>
+                        </div>
+                      </div>
 
-                  {/* 제출 버튼 */}
-                  <button type="submit" className="btn-primary">
-                    카드 등록
-                  </button>
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <h4 className="font-medium mb-2">포함된 기능:</h4>
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• AI 면접 연습 (무제한)</li>
+                          <li>• 자기소개서 작성 도우미</li>
+                          <li>• 번역 서비스</li>
+                          <li>• 이미지 생성</li>
+                          <li>• 감정 분석</li>
+                          <li>• 챗봇 서비스</li>
+                        </ul>
+                      </div>
+
+                      <button
+                        onClick={handleMonthlyPayment}
+                        disabled={subscription?.status === 'ACTIVE'}
+                        className="w-full btn-primary flex items-center justify-center"
+                      >
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        카카오페이로 결제하기
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -85,6 +85,9 @@ public class User extends BaseEntity {
     @Column(name = "admin_converted_at")
     private LocalDateTime adminConvertedAt;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     public User() {}
 
     public User(String email, String passwordHash, UserType userType) {
@@ -136,6 +139,16 @@ public class User extends BaseEntity {
         this.isActive = true;
     }
 
+    public void delete() {
+        this.isDeleted = true;
+        this.isActive = false;
+    }
+
+    public void restore() {
+        this.isDeleted = false;
+        this.isActive = true;
+    }
+
     public void updateEmploymentStatus(EmploymentStatus employmentStatus) {
         this.employmentStatus = employmentStatus;
     }
@@ -166,6 +179,10 @@ public class User extends BaseEntity {
 
     public boolean isCompanyEmailVerified() {
         return Boolean.TRUE.equals(companyEmailVerified);
+    }
+
+    public boolean isDeleted() {
+        return Boolean.TRUE.equals(isDeleted);
     }
 
     public String getPassword() {
@@ -283,5 +300,13 @@ public class User extends BaseEntity {
 
     public void setAdminConvertedAt(LocalDateTime adminConvertedAt) {
         this.adminConvertedAt = adminConvertedAt;
+    }
+
+    public Boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(Boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 }

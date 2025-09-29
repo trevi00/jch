@@ -60,7 +60,7 @@ const adminNavItems = [
     icon: MessageSquare
   },
   {
-    name: '자격증 관리',
+    name: '증명서 관리',
     href: '/admin/certificates',
     icon: Award
   }

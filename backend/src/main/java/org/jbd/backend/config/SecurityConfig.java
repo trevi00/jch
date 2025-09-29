@@ -164,6 +164,10 @@ public class SecurityConfig {
                         // AI 번역 서비스 - 공개 접근 허용
                         .requestMatchers("/ai/translation/**").permitAll()
 
+                        // Payment 관련 공개 엔드포인트
+                        // - 학원 소속 확인 (가입 전 확인 가능해야 함)
+                        .requestMatchers("/payment/academy/check").permitAll()
+
                         // 개발 편의를 위한 임시 설정
                         // TODO: 프로덕션에서는 제거 필요
                         .requestMatchers(HttpMethod.POST, "/categories/**").permitAll()

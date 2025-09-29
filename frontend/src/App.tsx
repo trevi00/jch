@@ -76,6 +76,10 @@ import MyApplications from '@/pages/applications/MyApplications'
 import ApplicantManagement from '@/pages/company/ApplicantManagement'
 import ApplicationsRouter from '@/pages/applications/ApplicationsRouter'
 
+// 💳 결제 관련 페이지
+import PaymentSuccess from '@/pages/payment/PaymentSuccess'
+import PaymentCancel from '@/pages/payment/PaymentCancel'
+
 // 👑 관리자 전용 페이지
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import UserManagement from '@/pages/admin/UserManagement'
@@ -125,6 +129,10 @@ function App() {
       <Route path="/auth/user-type" element={<UserTypeSelection />} />     {/* 사용자 타입 선택 (일반/기업) */}
       <Route path="/auth/callback" element={<OAuthCallback />} />          {/* OAuth 콜백 처리 */}
       <Route path="/auth/complete-profile" element={<CompleteProfile />} /> {/* 프로필 완성 */}
+
+      {/* 💳 결제 관련 (공개 라우트) */}
+      <Route path="/payment/success" element={<PaymentSuccess />} />       {/* 결제 성공 */}
+      <Route path="/payment/cancel" element={<PaymentCancel />} />         {/* 결제 취소 */}
 
       {/*
         👑 ADMIN ROUTES (관리자 전용)

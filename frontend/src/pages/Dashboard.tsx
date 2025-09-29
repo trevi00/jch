@@ -139,10 +139,11 @@ const GeneralUserDashboardComponent = () => {
   const { data: dashboardData, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ['general-user-dashboard'],
     queryFn: () => apiClient.getGeneralUserDashboard(),
-    staleTime: 5 * 60 * 1000, // 5분간 캐시 유지
+    staleTime: 0, // 캐시 즉시 무효화 (항상 최신 데이터 가져오기)
+    cacheTime: 0, // 캐시 저장 시간도 0으로 설정
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // 지수 백오프
-    refetchOnWindowFocus: false, // 창 포커스 시 자동 갱신 비활성화
+    refetchOnWindowFocus: true, // 창 포커스 시 자동 갱신 활성화
   })
 
   // 최신 채용공고 데이터 가져오기
@@ -295,9 +296,10 @@ const GeneralUserDashboardComponent = () => {
           'ASSOCIATE': 40,
           'BACHELOR': 60,
           'MASTER': 80,
-          'DOCTORAL': 100
+          'DOCTORATE': 100,  // 백엔드와 일치하도록 수정
+          'DOCTORAL': 100    // 호환성을 위해 둘 다 지원
         };
-        return degreeScores[edu.degree] || 0;
+        return degreeScores[edu.degree] || degreeScores[edu.educationLevel] || 0;
       }));
 
       // GPA 보너스 (최대 15점)
@@ -758,10 +760,6 @@ const GeneralUserDashboardComponent = () => {
                   <div className="text-yellow-600 text-sm font-medium mb-1">평균 점수</div>
                   <div className="text-2xl font-bold text-yellow-700">65점</div>
                 </div>
-                <div className="bg-green-50 p-3 rounded-lg text-center border border-green-200">
-                  <div className="text-green-600 text-sm font-medium mb-1">상위 퍼센트</div>
-                  <div className="text-2xl font-bold text-green-700">{100 - myPercentile}%</div>
-                </div>
               </div>
 
               {/* 위치 분석 바 */}
@@ -812,7 +810,7 @@ const GeneralUserDashboardComponent = () => {
                     ({totalScore >= 65 ? '+' : ''}{totalScore - 65}점)
                   </p>
                   <p>
-                    • 전체 지원자 중 상위 <strong>{100 - myPercentile}%</strong>에 해당합니다
+                    • 꾸준한 노력으로 실력을 향상시킬 수 있습니다
                   </p>
                   <p className={`font-medium ${totalScore >= 80 ? 'text-green-600' : totalScore >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
                     • 종합 평가: {totalScore >= 80 ? '우수한 경쟁력을 보유하고 있습니다' :
@@ -885,7 +883,7 @@ const GeneralUserDashboardComponent = () => {
                   <p className={`text-xs mt-1 ${
                     totalScore >= 80 ? 'text-green-600' : totalScore >= 60 ? 'text-yellow-600' : 'text-red-600'
                   }`}>
-                    상위 {100 - myPercentile}% • {totalScore >= 80 ? '경쟁력이 우수합니다' : totalScore >= 60 ? '평균 이상의 역량을 보유하고 있습니다' : '체계적인 역량 개발이 필요합니다'}
+                    {totalScore >= 80 ? '경쟁력이 우수합니다' : totalScore >= 60 ? '평균 이상의 역량을 보유하고 있습니다' : '체계적인 역량 개발이 필요합니다'}
                   </p>
                 </div>
               </div>

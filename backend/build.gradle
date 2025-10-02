@@ -49,7 +49,7 @@ dependencies {
 	
 	// Gmail API
 	implementation 'com.google.apis:google-api-services-gmail:v1-rev20220404-2.0.0'
-	implementation 'com.google.auth:google-auth-library-oauth2-http:1.19.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.39.1'
 	
 	// JavaMail API for Gmail integration
 	implementation 'javax.mail:javax.mail-api:1.6.2'

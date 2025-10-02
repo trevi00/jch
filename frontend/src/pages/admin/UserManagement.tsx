@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  Shield, 
-  Lock, 
-  Unlock,
-  Mail,
-  MailCheck,
+import {
+  Users,
+  Search,
+  Filter,
+  Shield,
+  Trash2,
   Building,
   User,
   Crown,
@@ -22,11 +19,6 @@ interface UserData {
   email: string
   name: string
   userType: 'GENERAL' | 'COMPANY' | 'ADMIN'
-  emailVerified: boolean
-  companyEmailVerified?: boolean
-  accountLocked: boolean
-  createdAt: string
-  lastLoginAt?: string
 }
 
 interface UserStatistics {
@@ -35,7 +27,6 @@ interface UserStatistics {
   companyUsers: number
   adminUsers: number
   activeUsers: number
-  lockedUsers: number
 }
 
 export default function UserManagement() {
@@ -48,8 +39,15 @@ export default function UserManagement() {
   // Check admin authentication
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken')
-    const isAdminStatus = localStorage.getItem('isAdmin')
-    setIsAdmin(adminToken && isAdminStatus === 'true')
+    const adminUserData = localStorage.getItem('adminUser')
+
+    try {
+      const adminUser = adminUserData ? JSON.parse(adminUserData) : null
+      setIsAdmin(adminToken && adminUser && adminUser.admin === true)
+    } catch (error) {
+      console.error('Error parsing admin user data:', error)
+      setIsAdmin(false)
+    }
   }, [])
 
   const { data: users, isLoading: usersLoading } = useQuery({
@@ -70,29 +68,16 @@ export default function UserManagement() {
     enabled: isAdmin
   })
 
-  const lockAccountMutation = useMutation({
-    mutationFn: (userId: number) => apiClient.lockUserAccount(userId),
+  const deleteAccountMutation = useMutation({
+    mutationFn: (userId: number) => apiClient.deleteUserAccount(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] })
       queryClient.invalidateQueries({ queryKey: ['user-statistics'] })
-      alert('계정이 잠금되었습니다.')
+      alert('계정이 삭제되었습니다.')
     },
     onError: (error) => {
-      console.error('계정 잠금 실패:', error)
-      alert('계정 잠금에 실패했습니다.')
-    }
-  })
-
-  const unlockAccountMutation = useMutation({
-    mutationFn: (userId: number) => apiClient.unlockUserAccount(userId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-      queryClient.invalidateQueries({ queryKey: ['user-statistics'] })
-      alert('계정 잠금이 해제되었습니다.')
-    },
-    onError: (error) => {
-      console.error('계정 잠금 해제 실패:', error)
-      alert('계정 잠금 해제에 실패했습니다.')
+      console.error('계정 삭제 실패:', error)
+      alert('계정 삭제에 실패했습니다.')
     }
   })
 
@@ -121,24 +106,13 @@ export default function UserManagement() {
     const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesUserType = userTypeFilter === 'ALL' || user.userType === userTypeFilter
-    const matchesStatus = statusFilter === 'ALL' || 
-                         (statusFilter === 'ACTIVE' && !user.accountLocked) ||
-                         (statusFilter === 'LOCKED' && user.accountLocked) ||
-                         (statusFilter === 'VERIFIED' && user.emailVerified) ||
-                         (statusFilter === 'UNVERIFIED' && !user.emailVerified)
-    
-    return matchesSearch && matchesUserType && matchesStatus
+
+    return matchesSearch && matchesUserType
   }) || []
 
-  const handleLockAccount = (userId: number) => {
-    if (confirm('정말로 이 계정을 잠그시겠습니까?')) {
-      lockAccountMutation.mutate(userId)
-    }
-  }
-
-  const handleUnlockAccount = (userId: number) => {
-    if (confirm('정말로 이 계정의 잠금을 해제하시겠습니까?')) {
-      unlockAccountMutation.mutate(userId)
+  const handleDeleteAccount = (userId: number) => {
+    if (confirm('정말로 이 계정을 삭제하시겠습니까? 삭제된 계정은 복구할 수 없습니다.')) {
+      deleteAccountMutation.mutate(userId)
     }
   }
 
@@ -173,7 +147,7 @@ export default function UserManagement() {
       </div>
 
       {/* 통계 카드 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card">
           <div className="card-content text-center">
             <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
@@ -200,20 +174,6 @@ export default function UserManagement() {
             <Crown className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
             <p className="text-sm font-medium text-gray-600">관리자</p>
             <p className="text-2xl font-bold text-gray-900">{statistics?.adminUsers || 0}</p>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-content text-center">
-            <CheckCircle className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-600">활성 회원</p>
-            <p className="text-2xl font-bold text-gray-900">{statistics?.activeUsers || 0}</p>
-          </div>
-        </div>
-        <div className="card">
-          <div className="card-content text-center">
-            <Lock className="w-8 h-8 text-red-500 mx-auto mb-2" />
-            <p className="text-sm font-medium text-gray-600">잠금된 계정</p>
-            <p className="text-2xl font-bold text-gray-900">{statistics?.lockedUsers || 0}</p>
           </div>
         </div>
       </div>
@@ -246,19 +206,6 @@ export default function UserManagement() {
               </select>
             </div>
 
-            <div>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="ALL">전체 상태</option>
-                <option value="ACTIVE">활성</option>
-                <option value="LOCKED">잠김</option>
-                <option value="VERIFIED">인증됨</option>
-                <option value="UNVERIFIED">미인증</option>
-              </select>
-            </div>
 
             <div className="text-sm text-gray-600 flex items-center">
               <Filter className="w-4 h-4 mr-2" />
@@ -277,10 +224,6 @@ export default function UserManagement() {
                 <tr className="border-b border-gray-200">
                   <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">사용자</th>
                   <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">유형</th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">이메일 인증</th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">계정 상태</th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">가입일</th>
-                  <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">최근 로그인</th>
                   <th className="text-left py-3 px-3 text-sm font-medium text-gray-600">작업</th>
                 </tr>
               </thead>
@@ -300,89 +243,14 @@ export default function UserManagement() {
                       </span>
                     </td>
                     <td className="py-3 px-3">
-                      <div className="flex flex-col space-y-1">
-                        <span className={`inline-flex items-center text-xs ${
-                          userData.emailVerified ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {userData.emailVerified ? (
-                            <>
-                              <MailCheck className="w-3 h-3 mr-1" />
-                              인증됨
-                            </>
-                          ) : (
-                            <>
-                              <Mail className="w-3 h-3 mr-1" />
-                              미인증
-                            </>
-                          )}
-                        </span>
-                        {userData.userType === 'COMPANY' && (
-                          <span className={`inline-flex items-center text-xs ${
-                            userData.companyEmailVerified ? 'text-green-600' : 'text-orange-600'
-                          }`}>
-                            {userData.companyEmailVerified ? (
-                              <>
-                                <Building className="w-3 h-3 mr-1" />
-                                기업인증
-                              </>
-                            ) : (
-                              <>
-                                <Building className="w-3 h-3 mr-1" />
-                                기업미인증
-                              </>
-                            )}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        userData.accountLocked 
-                          ? 'bg-red-100 text-red-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {userData.accountLocked ? (
-                          <>
-                            <Lock className="w-3 h-3 mr-1" />
-                            잠김
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            활성
-                          </>
-                        )}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-sm text-gray-500">
-                      {new Date(userData.createdAt).toLocaleDateString('ko-KR')}
-                    </td>
-                    <td className="py-3 px-3 text-sm text-gray-500">
-                      {userData.lastLoginAt 
-                        ? new Date(userData.lastLoginAt).toLocaleDateString('ko-KR')
-                        : '로그인 기록 없음'
-                      }
-                    </td>
-                    <td className="py-3 px-3">
                       <div className="flex space-x-2">
-                        {userData.accountLocked ? (
-                          <button
-                            onClick={() => handleUnlockAccount(userData.id)}
-                            className="text-green-600 hover:text-green-800"
-                            title="계정 잠금 해제"
-                          >
-                            <Unlock className="w-4 h-4" />
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleLockAccount(userData.id)}
-                            className="text-red-600 hover:text-red-800"
-                            title="계정 잠금"
-                          >
-                            <Lock className="w-4 h-4" />
-                          </button>
-                        )}
-                        
+                        <button
+                          onClick={() => handleDeleteAccount(userData.id)}
+                          className="text-red-600 hover:text-red-800"
+                          title="계정 삭제"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>

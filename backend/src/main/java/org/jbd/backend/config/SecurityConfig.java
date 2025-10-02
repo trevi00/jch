@@ -115,16 +115,12 @@ public class SecurityConfig {
 
                         // 인증 관련 엔드포인트는 모두 허용
                         // - /auth/** : 회원가입, 로그인, 토큰 갱신 등
-                        // - /admin/login, /admin/verify, /admin/promote : 관리자 로그인 및 권한 부여
+                        // - /admin/** : 관리자 전체 기능 (인증 없이 접근 허용)
                         // - /oauth2/**, /login/oauth2/** : OAuth2 로그인 흐름
                         .requestMatchers(
                                 "/auth/**",
-                                "/admin/login",
-                                "/admin/verify",
-                                "/admin/promote",
-                                "/api/admin/login",
-                                "/api/admin/verify",
-                                "/api/admin/promote",
+                                "/admin/**",
+                                "/api/admin/**",
                                 "/oauth2/**",
                                 "/login/oauth2/**"
                         ).permitAll()
@@ -165,13 +161,18 @@ public class SecurityConfig {
                                 "/api/support/categories"
                         ).permitAll()
 
+                        // AI 번역 서비스 - 공개 접근 허용
+                        .requestMatchers("/ai/translation/**").permitAll()
+
+                        // Payment 관련 공개 엔드포인트
+                        // - 학원 소속 확인 (가입 전 확인 가능해야 함)
+                        .requestMatchers("/payment/academy/check").permitAll()
+
                         // 개발 편의를 위한 임시 설정
                         // TODO: 프로덕션에서는 제거 필요
                         .requestMatchers(HttpMethod.POST, "/categories/**").permitAll()
 
-                        // 관리자 전용 엔드포인트
-                        // - 관리자 대시보드, 시스템 관리 기능
-                        .requestMatchers("/dashboard/admin", "/admin/**", "/api/admin/**").hasRole("ADMIN")
+                        // 관리자 엔드포인트는 위에서 permitAll()로 허용됨
 
                         // 기업 사용자 전용 엔드포인트
                         // - 기업 프로필 관리, 채용공고 등록 등
@@ -236,7 +237,11 @@ public class SecurityConfig {
                 "http://localhost:3000",    // React 개발 서버 (기본)
                 "http://localhost:3003",    // React 개발 서버 (대체)
                 "http://localhost:5173",    // Vite 개발 서버
-                "http://localhost:8081"     // 백엔드 서버 (개발용 동일 포트 접근)
+                "http://localhost:8081",    // 백엔드 서버 (개발용 동일 포트 접근)
+                "http://1.201.17.190",      // 운영 서버 (nginx)
+                "http://192.168.50.88:3000", // 내부 네트워크 프론트엔드
+                "http://192.168.50.88:8081", // 내부 네트워크 백엔드
+                "http://192.168.50.88"      // 내부 네트워크 nginx
         ));
 
         // 허용할 HTTP 메서드 설정 - RESTful API 전체 메서드 지원

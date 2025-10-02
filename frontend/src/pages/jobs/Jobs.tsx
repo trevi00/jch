@@ -283,18 +283,32 @@ export default function Jobs() {
                         </div>
                       </div>
 
-                      {job.requiredSkills && job.requiredSkills.length > 0 && (
+                      {job.requiredSkills && (
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {job.requiredSkills.slice(0, 6).map((skill, index) => (
-                            <Badge key={index} variant="outline" size="sm">
-                              {skill}
-                            </Badge>
-                          ))}
-                          {job.requiredSkills.length > 6 && (
-                            <Badge variant="secondary" size="sm">
-                              +{job.requiredSkills.length - 6}
-                            </Badge>
-                          )}
+                          {(() => {
+                            const skills = typeof job.requiredSkills === 'string'
+                              ? job.requiredSkills.split(',').map(s => s.trim())
+                              : Array.isArray(job.requiredSkills)
+                                ? job.requiredSkills
+                                : [];
+
+                            if (skills.length === 0) return null;
+
+                            return (
+                              <>
+                                {skills.slice(0, 6).map((skill, index) => (
+                                  <Badge key={index} variant="outline" size="sm">
+                                    {skill}
+                                  </Badge>
+                                ))}
+                                {skills.length > 6 && (
+                                  <Badge variant="secondary" size="sm">
+                                    +{skills.length - 6}
+                                  </Badge>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       )}
 

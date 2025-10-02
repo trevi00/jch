@@ -1,0 +1,91 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup SSH
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+
+    - name: Deploy Backend
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        ssh $SSH_USER@$SSH_HOST << 'ENDSSH'
+          cd /var/www/jch/backend
+          git pull origin main
+          ./gradlew build -x test
+          sudo systemctl restart jch-backend
+        ENDSSH
+
+    - name: Deploy Frontend
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        ssh $SSH_USER@$SSH_HOST << 'ENDSSH'
+          cd /var/www/jch/frontend
+          git pull origin main
+          npm ci
+          npm run build
+          sudo nginx -s reload
+        ENDSSH
+
+    - name: Deploy AI Service
+      env:
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+        SSH_USER: ${{ secrets.SSH_USER }}
+      run: |
+        ssh $SSH_USER@$SSH_HOST << 'ENDSSH'
+          cd /var/www/jch/ai-service
+          git pull origin main
+          pip install -r requirements.txt
+          sudo systemctl restart jch-ai-service
+        ENDSSH
+
+    - name: Health Check
+      env:
+        PROD_URL: ${{ secrets.PROD_URL }}
+      run: |
+        sleep 30
+        curl -f $PROD_URL || exit 1
+        curl -f $PROD_URL/api/health || exit 1
+
+    - name: Notify deployment status
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: 'Deployment ${{ job.status }} for ${{ github.event.inputs.environment || 'production' }}'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        channel: '#deployments'
+        username: 'GitHub Actions'

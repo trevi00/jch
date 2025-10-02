@@ -54,8 +54,15 @@ export default function JobManagement() {
   // Check admin authentication
   useEffect(() => {
     const adminToken = localStorage.getItem('adminToken')
-    const isAdminStatus = localStorage.getItem('isAdmin')
-    setIsAdmin(adminToken && isAdminStatus === 'true')
+    const adminUserData = localStorage.getItem('adminUser')
+
+    try {
+      const adminUser = adminUserData ? JSON.parse(adminUserData) : null
+      setIsAdmin(adminToken && adminUser && adminUser.admin === true)
+    } catch (error) {
+      console.error('Error parsing admin user data:', error)
+      setIsAdmin(false)
+    }
   }, [])
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('ALL')

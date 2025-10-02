@@ -1,0 +1,166 @@
+[
+  {
+    "interviewId": 1758936916,
+    "overallScore": 80.0,
+    "totalQuestions": 1,
+    "answeredQuestions": 1,
+    "completedAt": "2025-09-27T10:35:16.712422",
+    "jobRole": "백엔드 개발자",
+    "questions": [
+      {
+        "id": "1",
+        "question": "테스트 질문",
+        "type": "technical"
+      }
+    ],
+    "answers": [
+      {
+        "questionId": "1",
+        "answer": "테스트 답변",
+        "feedback": {
+          "score": 80,
+          "detailed_feedback": "좋은 답변"
+        }
+      }
+    ]
+  },
+  {
+    "interviewId": 1758938540,
+    "overallScore": 0,
+    "totalQuestions": 1,
+    "answeredQuestions": 1,
+    "completedAt": "2025-09-27T11:02:20.397990",
+    "jobRole": "Software Engineer",
+    "questions": [
+      {
+        "id": "question_1",
+        "question": "Tell me about yourself",
+        "type": "behavioral"
+      }
+    ],
+    "answers": [
+      {
+        "questionId": "question_1",
+        "answer": "I am a software engineer",
+        "feedback": null
+      }
+    ]
+  },
+  {
+    "interviewId": 1758939500,
+    "overallScore": 38.0,
+    "totalQuestions": 5,
+    "answeredQuestions": 5,
+    "completedAt": "2025-09-27T11:18:20.805842",
+    "jobRole": "백엔드",
+    "questions": [
+      {
+        "id": "question_1",
+        "question": "프로그래밍 언어 중 가장 자신있는 것은 무엇이며, 그 이유는?",
+        "type": "technical"
+      },
+      {
+        "id": "question_2",
+        "question": "데이터베이스와 관련된 기본적인 개념에 대해 설명해주세요.",
+        "type": "technical"
+      },
+      {
+        "id": "question_3",
+        "question": "RESTful API란 무엇이며, 어떤 상황에서 사용되는지 설명해주세요.",
+        "type": "technical"
+      },
+      {
+        "id": "question_4",
+        "question": "SQL Injection이 무엇이며, 어떻게 방지할 수 있는지에 대해 설명해주세요.",
+        "type": "technical"
+      },
+      {
+        "id": "question_5",
+        "question": "HTTPS와 HTTP의 주요 차이점은 무엇인가요? 왜 HTTPS를 사용해야 하는지 설명해주세요.",
+        "type": "technical"
+      }
+    ],
+    "answers": [
+      {
+        "question_id": "question_1",
+        "answer": "자바",
+        "feedback": {
+          "score": 60,
+          "strengths": [
+            "자바 프로그래밍 경험",
+            "다양한 플랫폼에서 사용 가능",
+            "강력한 커뮤니티 지원"
+          ],
+          "improvements": [
+            "더 많은 이유와 구체적인 경험 공유",
+            "다른 프로그래밍 언어에 대한 이해도 향상",
+            "실무 프로젝트 경험 쌓기"
+          ],
+          "suggestion": ""
+        }
+      },
+      {
+        "question_id": "question_2",
+        "answer": "dn",
+        "feedback": {
+          "score": 40,
+          "strengths": [
+            "기본적인 데이터베이스 개념 이해"
+          ],
+          "improvements": [
+            "더 많은 실무 경험 및 학습 필요"
+          ],
+          "suggestion": ""
+        }
+      },
+      {
+        "question_id": "question_3",
+        "answer": "협업",
+        "feedback": {
+          "score": 40,
+          "strengths": [
+            "RESTful API에 대한 기본 이해",
+            "협업 능력 강조"
+          ],
+          "improvements": [
+            "기술적인 내용 보완",
+            "실무적 예시 추가",
+            "기술적인 측면 강조"
+          ],
+          "suggestion": ""
+        }
+      },
+      {
+        "question_id": "question_4",
+        "answer": "해킹",
+        "feedback": {
+          "score": 25,
+          "strengths": [
+            "SQL Injection에 대한 이해 부족"
+          ],
+          "improvements": [
+            "SQL Injection에 대한 정확한 설명 추가",
+            "방지 방법에 대한 구체적인 내용 추가"
+          ],
+          "suggestion": ""
+        }
+      },
+      {
+        "question_id": "question_5",
+        "answer": "보안",
+        "feedback": {
+          "score": 25,
+          "strengths": [
+            "HTTPS와 HTTP의 차이에 대한 이해",
+            "HTTPS의 중요성을 인지한 점"
+          ],
+          "improvements": [
+            "보다 구체적인 설명 추가 필요",
+            "실제 사례나 예시를 활용하여 설명 강화 필요"
+          ],
+          "suggestion": ""
+        }
+      }
+    ]
+  }
+]

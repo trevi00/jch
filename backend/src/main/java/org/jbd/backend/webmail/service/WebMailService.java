@@ -29,7 +29,7 @@ import java.util.List;
 @Transactional
 public class WebMailService {
     
-    @Value("${spring.mail.password:}")
+    @Value("${spring.mail.password}")
     private String sendGridApiKey;
     
     @Value("${spring.profiles.active:local}")

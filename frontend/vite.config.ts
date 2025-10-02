@@ -13,6 +13,8 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: '0.0.0.0',
+    allowedHosts: ['jobatda.shop', '1.201.17.190', 'localhost'],
     proxy: {
       '/api': {
         target: 'http://localhost:8081',

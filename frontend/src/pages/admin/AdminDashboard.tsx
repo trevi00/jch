@@ -53,6 +53,7 @@ interface AdminDashboardData {
 }
 
 export default function AdminDashboard() {
+  console.log('AdminDashboard component is rendering')
   const [dashboardData, setDashboardData] = useState<AdminDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

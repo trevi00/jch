@@ -208,7 +208,7 @@ export default function Community() {
                   {post.imageUrl && (
                     <div className="mt-2">
                       <img 
-                        src={post.imageUrl.startsWith('/') ? `http://localhost:8001${post.imageUrl}` : post.imageUrl} 
+                        src={post.imageUrl.startsWith('/') ? `/ai${post.imageUrl}` : post.imageUrl} 
                         alt="게시글 이미지"
                         className="max-w-xs max-h-32 rounded-lg object-cover"
                       />

@@ -218,9 +218,9 @@ export default function CreatePost() {
                   {generatedImageUrl && (
                     <div className="mt-4">
                       <p className="text-sm text-blue-700 mb-2">생성된 이미지:</p>
-                      <img 
-                        src={generatedImageUrl.startsWith('/') ? `http://localhost:8001${generatedImageUrl}` : generatedImageUrl} 
-                        alt="AI 생성 이미지" 
+                      <img
+                        src={generatedImageUrl.startsWith('/') ? `/ai${generatedImageUrl}` : generatedImageUrl}
+                        alt="AI 생성 이미지"
                         className="max-w-md rounded-lg shadow-md"
                       />
                     </div>

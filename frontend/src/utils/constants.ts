@@ -1,6 +1,6 @@
 // API Configuration - 환경 변수 우선, fallback으로 기본값 사용
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
-export const AI_SERVICE_BASE_URL = import.meta.env.VITE_AI_SERVICE_BASE_URL || 'http://localhost:8001/api'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''
+export const AI_SERVICE_BASE_URL = import.meta.env.VITE_AI_SERVICE_BASE_URL || 'http://localhost:8001'
 
 // Application Configuration
 export const APP_CONFIG = {

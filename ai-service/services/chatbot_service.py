@@ -22,7 +22,8 @@ class ChatbotService:
         Settings.llm = OpenAI(
             model="gpt-3.5-turbo",
             temperature=0.1,  # 정확한 답변을 위해 낮은 온도
-            api_key=settings.OPENAI_API_KEY
+            api_key=settings.OPENAI_API_KEY,
+            system_prompt="You are a Korean language assistant. Always respond in Korean only. 한국어로만 답변하세요."
         )
         Settings.embed_model = OpenAIEmbedding(
             model="text-embedding-ada-002",
@@ -146,7 +147,7 @@ class ChatbotService:
             del self.user_sessions[user_id]
             logger.info(f"사용자 {user_id}의 세션이 초기화되었습니다")
     
-    async def chat(self, user_id: str, message: str) -> Dict[str, Any]:
+    async def chat(self, user_id: str, message: str, language: str = "ko") -> Dict[str, Any]:
         """챗봇과 대화"""
         if not self.chat_engine:
             return {
@@ -154,18 +155,40 @@ class ChatbotService:
                 "response": "죄송합니다. 현재 챗봇 서비스를 이용할 수 없습니다. 잠시 후 다시 시도해주세요.",
                 "error": "chat_engine_not_available"
             }
-        
+
         try:
             # 사용자 세션 가져오기
             session = self.get_user_session(user_id)
-            
+
             logger.info(f"사용자 {user_id} 질문: {message}")
-            
-            # 한국어 답변을 유도하는 메시지 추가
-            korean_prompt = f"[한국어로만 답변] 당신은 '잡았다' 취업 플랫폼의 전문 상담사입니다. 친근하고 정중한 한국어로 취업 관련 조언을 제공해주세요. 질문: {message}"
+
+            # 언어별 프롬프트 설정
+            if language == "ko":
+                system_prompt = f"""당신은 한국의 '잡았다' 취업 플랫폼의 전문 한국어 상담사입니다.
+
+🚨 중요한 지시사항 🚨
+- 반드시 한국어로만 응답하세요
+- 절대로 영어로 답변하지 마세요
+- 모든 문장을 한국어로 작성하세요
+- English responses are strictly prohibited
+- You must respond only in Korean language
+- 한국어가 아닌 언어로는 절대 답변하지 마세요
+
+당신은 친근하고 정중한 한국어 상담사로서, 사용자의 취업 관련 질문에 한국어로만 답변합니다.
+
+사용자 질문: {message}
+
+반드시 한국어로만 답변해주세요:"""
+            else:
+                system_prompt = f"""You are a professional consultant for '잡았다' employment platform.
+Please respond in a friendly and professional manner.
+
+User question: {message}
+
+Answer:"""
             
             # 채팅 엔진으로 응답 생성
-            response = self.chat_engine.chat(korean_prompt)
+            response = self.chat_engine.chat(system_prompt)
             response_text = str(response)
             
             # 세션 히스토리에 추가

@@ -76,6 +76,10 @@ import MyApplications from '@/pages/applications/MyApplications'
 import ApplicantManagement from '@/pages/company/ApplicantManagement'
 import ApplicationsRouter from '@/pages/applications/ApplicationsRouter'
 
+// 💳 결제 관련 페이지
+import PaymentSuccess from '@/pages/payment/PaymentSuccess'
+import PaymentCancel from '@/pages/payment/PaymentCancel'
+
 // 👑 관리자 전용 페이지
 import AdminDashboard from '@/pages/admin/AdminDashboard'
 import UserManagement from '@/pages/admin/UserManagement'
@@ -83,6 +87,8 @@ import JobManagement from '@/pages/admin/JobManagement'
 import CommunityManagement from '@/pages/admin/CommunityManagement'
 import CertificateManagement from '@/pages/admin/CertificateManagement'
 import AdminLogin from '@/pages/admin/AdminLogin'
+import AdminPromote from '@/pages/admin/AdminPromote'
+import TestAdmin from '@/pages/admin/TestAdmin'
 
 // 상태 관리 훅
 import { useAuthStore } from '@/hooks/useAuthStore'
@@ -124,23 +130,31 @@ function App() {
       <Route path="/auth/callback" element={<OAuthCallback />} />          {/* OAuth 콜백 처리 */}
       <Route path="/auth/complete-profile" element={<CompleteProfile />} /> {/* 프로필 완성 */}
 
+      {/* 💳 결제 관련 (공개 라우트) */}
+      <Route path="/payment/success" element={<PaymentSuccess />} />       {/* 결제 성공 */}
+      <Route path="/payment/cancel" element={<PaymentCancel />} />         {/* 결제 취소 */}
+
       {/*
         👑 ADMIN ROUTES (관리자 전용)
         완전히 분리된 관리자 영역
         AdminRouteGuard를 통한 이중 보안 검증
       */}
       <Route path="/admin/login" element={<AdminLogin />} />
+      <Route path="/admin/test" element={<TestAdmin />} />
       <Route path="/admin/*" element={
         <AdminRouteGuard>
-          <AdminLayout />
+          <Routes>
+            <Route element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="jobs" element={<JobManagement />} />
+              <Route path="community" element={<CommunityManagement />} />
+              <Route path="certificates" element={<CertificateManagement />} />
+              <Route path="promote" element={<AdminPromote />} />
+            </Route>
+          </Routes>
         </AdminRouteGuard>
-      }>
-        <Route path="users" element={<UserManagement />} />
-        <Route path="jobs" element={<JobManagement />} />
-        <Route path="community" element={<CommunityManagement />} />
-        <Route path="certificates" element={<CertificateManagement />} />
-        <Route index element={<AdminDashboard />} />
-      </Route>
+      } />
 
       {/*
         🔐 PROTECTED USER ROUTES (인증 필요)

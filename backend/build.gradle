@@ -25,7 +25,7 @@ repositories {
 }
 
 ext {
-	testContainersVersion = '1.19.0'
+	testContainersVersion = '1.21.3'
 	fixtureMonkeyVersion = '1.1.0'
 }
 

@@ -59,7 +59,6 @@ graph LR
 **면접 유형**:
 - 💻 기술면접 (Technical Interview)
 - 🤝 인성면접 (Behavioral Interview)
-- 💼 상황면접 (Situational Interview)
 
 #### 3. **AI 웹메일 번역 기능**
 - 해외 취업 준비자를 위한 영문 이력서/웹메일 실시간 번역
